@@ -1,10 +1,10 @@
 package com.bugjc.flink.config;
 
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
 import com.bugjc.flink.config.util.InputStreamUtil;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.reflections.Reflections;
@@ -41,7 +41,7 @@ public class EnvironmentConfig implements Serializable {
 
         //然后在尝试加载环境配置文件，多个用逗号分隔，具体同 springboot 规则一致
         String envNameStr = this.parameterTool.get(ENV_PROPERTY_NAME);
-        if (StrUtil.isBlank(envNameStr)) {
+        if (StringUtils.isBlank(envNameStr)) {
             throw new NullPointerException("`flink.profiles.active` attribute value is not configured");
         }
 
@@ -52,7 +52,7 @@ public class EnvironmentConfig implements Serializable {
 
         //扫描项目配置的基本包路径的属性自动配置类
         String scanBasePackages = this.parameterTool.get(SCAN_BASE_PACKAGES);
-        if (StrUtil.isBlank(scanBasePackages)) {
+        if (StringUtils.isBlank(scanBasePackages)) {
             throw new NullPointerException("`flink.scanBasePackages` attribute value is not configured");
         }
 

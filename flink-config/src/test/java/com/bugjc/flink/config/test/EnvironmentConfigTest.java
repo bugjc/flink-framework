@@ -44,9 +44,14 @@ class EnvironmentConfigTest {
             @Override
             public void run(SourceContext<String> ctx) throws InterruptedException {
                 Random random = new Random();
+                int count = 0;
                 while (isRunning) {
                     ctx.collect(String.valueOf(random.nextInt()));
-                    Thread.sleep(2000);
+                    count++;
+                    if (count > 100){
+                        isRunning = false;
+                    }
+                    Thread.sleep(10);
                 }
             }
 
