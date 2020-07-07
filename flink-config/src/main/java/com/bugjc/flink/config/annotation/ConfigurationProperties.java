@@ -15,7 +15,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ConfigurationProperties {
     /**
-     * 匹配字段的前缀
+     * 匹配字段的前缀,解析属性时会去掉配置的前缀。
+     * 示例：prefix = `flink.kafka.consumer.` 属性值 flink.kafka.consumer.bootstrap.servers=192.168.0.103:9092
+     * 会替换成 consumer.bootstrap.servers=192.168.0.103:9092
      *
      * @return
      */

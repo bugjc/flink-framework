@@ -1,3 +1,0 @@
-## 项目介绍
-#### flink-config
-基于 `Spring Boot` 约定优于配置的编程原则，在结合 `flink` 提供的 `ParameterTool` 工具类而编写的一种简单的配置文件管理工具。
