@@ -1,4 +1,4 @@
-package com.bugjc.flink.datasource.connection;
+package com.bugjc.flink.datasource.database.connection;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -10,14 +10,14 @@ import java.sql.SQLException;
  * @author aoki
  * @date 2020/7/7
  **/
-public abstract class AbstractConnection {
+public interface BasicDataSource {
 
     /**
      * 获取数据连接池
      *
      * @return
      */
-    public abstract DataSource getDataSource();
+    DataSource getDataSource();
 
     /**
      * 获取一个数据库连接对象
@@ -25,11 +25,11 @@ public abstract class AbstractConnection {
      * @return
      * @throws SQLException
      */
-    public abstract Connection getConnection() throws SQLException;
+    Connection getConnection() throws SQLException;
 
     /**
      * 关闭对应数据源连接池
      * @throws SQLException
      */
-    public abstract void close() throws SQLException;
+    void close() throws SQLException;
 }

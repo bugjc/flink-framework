@@ -1,9 +1,8 @@
-package com.bugjc.flink.datasource;
+package com.bugjc.flink.datasource.database;
 
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
-import com.bugjc.flink.datasource.factory.DataSourceFactory;
+import com.bugjc.flink.datasource.database.factory.DataSourceFactory;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,11 +34,14 @@ public class DataSourceConfig implements Serializable {
     @Getter
     private static transient DataSourceFactory dataSourceFactory;
 
+    public DataSourceConfig(){
+        dataSourceFactory = new DataSourceFactory();
+    }
+
     /**
      * 初始化数据源工厂
      */
     public synchronized void init() {
-        dataSourceFactory = new DataSourceFactory();
         dataSourceFactory.createDataSource(this);
     }
 }
