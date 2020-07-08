@@ -1,6 +1,5 @@
 package com.bugjc.flink.datasource.database.connection;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -13,13 +12,6 @@ import java.sql.SQLException;
 public interface BasicDataSource {
 
     /**
-     * 获取数据连接池
-     *
-     * @return
-     */
-    DataSource getDataSource();
-
-    /**
      * 获取一个数据库连接对象
      *
      * @return
@@ -29,6 +21,7 @@ public interface BasicDataSource {
 
     /**
      * 关闭对应数据源连接池
+     *
      * @throws SQLException
      */
     void close() throws SQLException;

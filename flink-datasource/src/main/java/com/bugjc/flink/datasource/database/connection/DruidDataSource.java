@@ -2,6 +2,8 @@ package com.bugjc.flink.datasource.database.connection;
 
 import com.bugjc.flink.datasource.database.DataSourceConfig;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -10,12 +12,23 @@ import java.sql.SQLException;
  * @author aoki
  * @date 2020/7/7
  **/
-public class DruidDataSource extends AbstractBasicDataSource<com.alibaba.druid.pool.DruidDataSource> {
-    private final com.alibaba.druid.pool.DruidDataSource dataSource;
+public class DruidDataSource implements BasicDataSource {
 
-    public DruidDataSource(com.alibaba.druid.pool.DruidDataSource dataSource, DataSourceConfig dataSourceConfig) {
-        super(dataSource, dataSourceConfig);
-        this.dataSource = dataSource;
+    private final com.alibaba.druid.pool.DruidDataSource dataSource;
+    private final DataSourceConfig dataSourceConfig;
+
+    public DruidDataSource(DataSource dataSource, DataSourceConfig dataSourceConfig) {
+        this.dataSource = (com.alibaba.druid.pool.DruidDataSource) dataSource;
+        this.dataSourceConfig = dataSourceConfig;
+    }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+        this.dataSource.setDriverClassName(dataSourceConfig.getDriverClassName());
+        this.dataSource.setUrl(dataSourceConfig.getUrl());
+        this.dataSource.setUsername(dataSourceConfig.getUsername());
+        this.dataSource.setPassword(dataSourceConfig.getPassword());
+        return this.dataSource.getConnection();
     }
 
     @Override

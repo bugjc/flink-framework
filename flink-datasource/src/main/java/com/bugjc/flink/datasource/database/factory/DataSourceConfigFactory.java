@@ -1,10 +1,10 @@
 package com.bugjc.flink.datasource.database.factory;
 
 import com.bugjc.flink.datasource.database.DataSourceConfig;
+import com.bugjc.flink.datasource.database.connection.BasicDataSource;
 import com.bugjc.flink.datasource.database.connection.Dbcp2DataSource;
 import com.bugjc.flink.datasource.database.connection.DruidDataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
@@ -20,10 +20,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2020/7/7
  **/
 @Slf4j
-public class DataSourceFactory implements Serializable {
+public class DataSourceConfigFactory implements Serializable {
 
-    private final Map<String, DataSource> DATA_SOURCE_MAP = new ConcurrentHashMap<>(8);
-    private DataSource currentDataSource = null;
+    private final Map<String, BasicDataSource> DATA_SOURCE_MAP = new ConcurrentHashMap<>(8);
+    private BasicDataSource currentDataSource = null;
     private DataSourceConfig currentDataSourceConfig = null;
 
     /**
@@ -31,27 +31,29 @@ public class DataSourceFactory implements Serializable {
      *
      * @param dataSourceConfig --数据源配置
      */
-    public DataSourceFactory createDataSource(DataSourceConfig dataSourceConfig) {
+    public DataSourceConfigFactory createDataSource(DataSourceConfig dataSourceConfig) {
         if (dataSourceConfig.getClassName() == null) {
             throw new NullPointerException("`className` parameter not configured！");
         }
 
         // 如果已经存在已有数据源（连接池）直接返回
-        final DataSource existedDataSource = DATA_SOURCE_MAP.get(dataSourceConfig.getClassName());
-        if (existedDataSource != null) {
+        BasicDataSource basicDataSource = this.DATA_SOURCE_MAP.get(dataSourceConfig.getClassName());
+        if (basicDataSource != null) {
             return this;
         }
 
         try {
             DataSource dataSource = (DataSource) Class.forName(dataSourceConfig.getClassName()).newInstance();
-            if (dataSource instanceof BasicDataSource) {
-                dataSource = new Dbcp2DataSource((BasicDataSource) dataSource, dataSourceConfig).getDataSource();
+            if (dataSource instanceof org.apache.commons.dbcp2.BasicDataSource) {
+                basicDataSource = new Dbcp2DataSource(dataSource, dataSourceConfig);
             } else if (dataSource instanceof com.alibaba.druid.pool.DruidDataSource) {
-                dataSource = new DruidDataSource((com.alibaba.druid.pool.DruidDataSource) dataSource, dataSourceConfig).getDataSource();
+                basicDataSource = new DruidDataSource(dataSource, dataSourceConfig);
+            } else {
+                throw new NullPointerException("this database connection pool is not supported");
             }
 
-            DATA_SOURCE_MAP.put(dataSourceConfig.getClassName(), dataSource);
-            this.currentDataSource = dataSource;
+            this.DATA_SOURCE_MAP.put(dataSourceConfig.getClassName(), basicDataSource);
+            this.currentDataSource = basicDataSource;
             this.currentDataSourceConfig = dataSourceConfig;
 
             return this;
@@ -73,7 +75,7 @@ public class DataSourceFactory implements Serializable {
      * @throws SQLException
      */
     public Connection getConnection(DataSourceConfig dataSourceConfig) throws SQLException {
-        DataSource dataSource = DATA_SOURCE_MAP.get(dataSourceConfig.getClassName());
+        BasicDataSource dataSource = this.DATA_SOURCE_MAP.get(dataSourceConfig.getClassName());
         log.info("DataSource={}", dataSource.hashCode());
         return dataSource.getConnection();
     }
@@ -88,7 +90,7 @@ public class DataSourceFactory implements Serializable {
         if (this.currentDataSource == null) {
             throw new NullPointerException("this database connection pool is not supported");
         }
-        log.info("DataSource={}", currentDataSource.hashCode());
+        log.info("DataSource={}", this.currentDataSource.hashCode());
         return this.currentDataSource.getConnection();
     }
 
@@ -106,7 +108,9 @@ public class DataSourceFactory implements Serializable {
      * 关闭当前数据源连接池
      */
     public void close() {
-        DATA_SOURCE_MAP.remove(this.currentDataSourceConfig.getClassName());
+        this.DATA_SOURCE_MAP.remove(this.currentDataSourceConfig.getClassName());
+        this.currentDataSource = null;
+        this.currentDataSourceConfig = null;
     }
 
     /**

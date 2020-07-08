@@ -1,9 +1,9 @@
 package com.bugjc.flink.datasource.database;
 
+import com.bugjc.flink.config.Config;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
-import com.bugjc.flink.datasource.database.factory.DataSourceFactory;
+import com.bugjc.flink.datasource.database.factory.DataSourceConfigFactory;
 import lombok.Data;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -17,7 +17,7 @@ import java.io.Serializable;
 @Data
 @Slf4j
 @ConfigurationProperties(prefix = "flink.datasource.")
-public class DataSourceConfig implements Serializable {
+public class DataSourceConfig implements Config, Serializable {
 
     private String driverClassName;
     private String url;
@@ -31,17 +31,15 @@ public class DataSourceConfig implements Serializable {
     /**
      * 数据源工厂对象
      */
-    @Getter
-    private static transient DataSourceFactory dataSourceFactory;
-
-    public DataSourceConfig(){
-        dataSourceFactory = new DataSourceFactory();
-    }
+    private transient DataSourceConfigFactory dataSourceConfigFactory;
 
     /**
      * 初始化数据源工厂
      */
+
+    @Override
     public synchronized void init() {
-        dataSourceFactory.createDataSource(this);
+        //配置属性初始化的时候自动执行此方法
+        this.dataSourceConfigFactory = new DataSourceConfigFactory().createDataSource(this);
     }
 }

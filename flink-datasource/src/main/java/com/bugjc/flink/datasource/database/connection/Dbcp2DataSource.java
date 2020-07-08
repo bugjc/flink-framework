@@ -1,8 +1,12 @@
 package com.bugjc.flink.datasource.database.connection;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import com.bugjc.flink.datasource.database.DataSourceConfig;
 import org.apache.commons.dbcp2.BasicDataSource;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 
@@ -12,16 +16,23 @@ import java.sql.SQLException;
  * @author aoki
  * @date 2020/7/7
  **/
-public class Dbcp2DataSource extends AbstractBasicDataSource<BasicDataSource> {
+public class Dbcp2DataSource implements com.bugjc.flink.datasource.database.connection.BasicDataSource {
     private final BasicDataSource dataSource;
-    //数据库
-    public Dbcp2DataSource(BasicDataSource dataSource, DataSourceConfig dataSourceConfig) {
-        super(dataSource, dataSourceConfig);
-        this.dataSource = dataSource;
+
+    public Dbcp2DataSource(DataSource dataSource, DataSourceConfig dataSourceConfig) {
+        this.dataSource = (BasicDataSource) dataSource;
+        CopyOptions copyOptions = CopyOptions.create().ignoreCase().ignoreNullValue();
+        BeanUtil.copyProperties(dataSourceConfig, this.dataSource, copyOptions);
+    }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+        return this.dataSource.getConnection();
     }
 
     @Override
     public void close() throws SQLException {
         this.dataSource.close();
     }
+
 }

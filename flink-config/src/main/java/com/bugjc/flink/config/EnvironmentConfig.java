@@ -137,7 +137,12 @@ public class EnvironmentConfig implements Serializable {
      * @return
      */
     public <T> T getComponent(Class<T> c) {
-        return JSON.parseObject(this.parameterTool.get(c.getName()), c);
+        T t = JSON.parseObject(this.parameterTool.get(c.getName()), c);
+        if (t.getClass().equals(c)) {
+            Config config = (Config) t;
+            config.init();
+        }
+        return t;
     }
 
     /**
