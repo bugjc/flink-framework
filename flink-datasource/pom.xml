@@ -14,12 +14,17 @@
     <version>1.0</version>
     <packaging>jar</packaging>
 
-
     <dependencies>
         <dependency>
             <groupId>com.bugjc.flink.config</groupId>
             <artifactId>flink-config</artifactId>
             <version>1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka-0.11_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
         </dependency>
 
         <dependency>

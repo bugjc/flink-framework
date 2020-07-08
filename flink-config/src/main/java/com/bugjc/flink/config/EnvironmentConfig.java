@@ -1,18 +1,15 @@
 package com.bugjc.flink.config;
 
 import com.alibaba.fastjson.JSON;
-import com.bugjc.flink.config.annotation.ConfigurationProperties;
-import com.bugjc.flink.config.util.InputStreamUtil;
+import com.bugjc.flink.config.util.InitializeUtil;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.reflections.Reflections;
-import org.reflections.ReflectionsException;
 import scala.Serializable;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * 加载执行环境工具类
@@ -22,10 +19,8 @@ import java.util.stream.Collectors;
  **/
 public class EnvironmentConfig implements Serializable {
 
-    private static final String ENV_PROPERTY_NAME = "flink.profiles.active";
-    private static final String SCAN_BASE_PACKAGES = "flink.scanBasePackages";
     @Getter
-    private ParameterTool parameterTool;
+    private final ParameterTool parameterTool;
 
     /**
      * 构建配置文件
@@ -36,76 +31,18 @@ public class EnvironmentConfig implements Serializable {
      * @throws Exception
      */
     public EnvironmentConfig(final String[] args) throws Exception {
-        //首先加载默认配置文件
-        this.parameterTool = ParameterTool.fromPropertiesFile(InputStreamUtil.getDefaultPropertiesInputStream());
 
-        //然后在尝试加载环境配置文件，多个用逗号分隔，具体同 springboot 规则一致
-        String envNameStr = this.parameterTool.get(ENV_PROPERTY_NAME);
-        if (StringUtils.isBlank(envNameStr)) {
-            throw new NullPointerException("`flink.profiles.active` attribute value is not configured");
-        }
+        //加载用户配置
+        ParameterTool parameterTool = InitializeUtil.loadUserProperties(args);
 
-        String[] envNameArr = envNameStr.split(",");
-        for (String envName : envNameArr) {
-            this.parameterTool = ParameterTool.fromPropertiesFile(InputStreamUtil.getPropertiesInputStream(envName)).mergeWith(this.parameterTool);
-        }
-
-        //扫描项目配置的基本包路径的属性自动配置类
-        String scanBasePackages = this.parameterTool.get(SCAN_BASE_PACKAGES);
-        if (StringUtils.isBlank(scanBasePackages)) {
-            throw new NullPointerException("`flink.scanBasePackages` attribute value is not configured");
-        }
-
-        Reflections reflections;
-        Set<Class<?>> setClasses = new HashSet<>();
-        try {
-            reflections = new Reflections(scanBasePackages);
-            setClasses = reflections.getTypesAnnotatedWith(ConfigurationProperties.class);
-        } catch (ReflectionsException reflectionsException) {
-            //ignore
-        }
+        //获取配置文件类
+        Set<Class<?>> setClasses = InitializeUtil.scanConfig(parameterTool);
 
         //解析自定义参数
-        List<Map.Entry<String, String>> propertyList = new ArrayList<>(this.parameterTool.toMap().entrySet());
-        propertyList.sort(Map.Entry.comparingByKey());
+        Map<String, String> propertiesMap = InitializeUtil.parseConfig(parameterTool, setClasses);
 
-        Map<String, String> autoComponentProperties = new HashMap<>();
-        Map<String, Map<String, String>> componentGroupProperties = new HashMap<>();
-
-        Iterator<Map.Entry<String, String>> iterator = propertyList.iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> map = iterator.next();
-            String key = map.getKey();
-            String value = map.getValue();
-            for (Class<?> setClass : setClasses) {
-                ConfigurationProperties configurationProperties = setClass.getAnnotation(ConfigurationProperties.class);
-                if (key.startsWith(configurationProperties.prefix())) {
-                    if (!componentGroupProperties.containsKey(configurationProperties.prefix())) {
-                        componentGroupProperties.put(configurationProperties.prefix(), new HashMap<>());
-                    }
-                    Map<String, String> values = componentGroupProperties.get(configurationProperties.prefix());
-                    String newKey = key.replaceAll(configurationProperties.prefix(), "");
-                    values.put(newKey, value);
-                    componentGroupProperties.put(configurationProperties.prefix(), values);
-                    autoComponentProperties.put(setClass.getName(), JSON.toJSONString(values));
-                    iterator.remove();
-                }
-            }
-
-        }
-
-        Map<String, String> combineResultMap = new HashMap<String, String>();
-        combineResultMap.putAll(propertyList.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        combineResultMap.putAll(autoComponentProperties);
-
-        this.parameterTool = ParameterTool.fromMap(combineResultMap);
-
-        //最后在加载运行 jar 时用户输入的参数
-        if (args != null) {
-            this.parameterTool = ParameterTool.fromArgs(args).mergeWith(parameterTool);
-        }
-
-        this.parameterTool = ParameterTool.fromSystemProperties().mergeWith(parameterTool);
+        //将属性集暴露出去
+        this.parameterTool = ParameterTool.fromMap(propertiesMap);
     }
 
     /**
@@ -138,7 +75,11 @@ public class EnvironmentConfig implements Serializable {
      */
     public <T> T getComponent(Class<T> c) {
         T t = JSON.parseObject(this.parameterTool.get(c.getName()), c);
-        if (t.getClass().equals(c)) {
+        if (t == null) {
+            throw new NullPointerException("this class is not a component!");
+        }
+
+        if (t instanceof Config) {
             Config config = (Config) t;
             config.init();
         }

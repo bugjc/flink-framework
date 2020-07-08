@@ -107,7 +107,8 @@ public class DataSourceConfigFactory implements Serializable {
     /**
      * 关闭当前数据源连接池
      */
-    public void close() {
+    public void close() throws SQLException {
+        this.DATA_SOURCE_MAP.get(this.currentDataSourceConfig.getClassName()).close();
         this.DATA_SOURCE_MAP.remove(this.currentDataSourceConfig.getClassName());
         this.currentDataSource = null;
         this.currentDataSourceConfig = null;
@@ -116,7 +117,10 @@ public class DataSourceConfigFactory implements Serializable {
     /**
      * 销毁工厂类，关闭所有数据源
      */
-    public void destroy() {
-        DATA_SOURCE_MAP.clear();
+    public void destroy() throws SQLException {
+        for (String key : DATA_SOURCE_MAP.keySet()) {
+            this.DATA_SOURCE_MAP.get(key).close();
+        }
+        this.DATA_SOURCE_MAP.clear();
     }
 }
