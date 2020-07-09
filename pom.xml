@@ -10,7 +10,7 @@
     <version>1.0</version>
     <modules>
         <module>flink-config</module>
-        <module>flink-datasource</module>
+        <module>flink-connector</module>
     </modules>
 
 

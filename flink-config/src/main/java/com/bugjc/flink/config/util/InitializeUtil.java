@@ -1,6 +1,7 @@
 package com.bugjc.flink.config.util;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.bugjc.flink.config.Config;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
 import org.apache.commons.lang3.StringUtils;
@@ -9,14 +10,16 @@ import org.reflections.Reflections;
 import org.reflections.ReflectionsException;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * 初始化配置工具类
+ *
  * @author aoki
  * @date 2020/7/8
- * **/
+ **/
 public class InitializeUtil {
 
     private static final String ENV_PROPERTY_NAME = "flink.profiles.active";
@@ -51,7 +54,8 @@ public class InitializeUtil {
     }
 
     /**
-     * 扫描出配置文件类
+     * 扫描出配置文件类。
+     * 查找出定义了 @ConfigProperty 注解、且直接或间接实现了 Config 接口类的 class.
      *
      * @param parameterTool
      * @return
@@ -113,9 +117,8 @@ public class InitializeUtil {
 
                     //合并的属性字段默认去掉前缀
                     Map<String, String> values = tempComponentConfigProperties.get(configurationProperties.prefix());
-                    String newKey = key.replaceAll(configurationProperties.prefix(), "");
-                    values.put(newKey, value);
-
+                    String fieldName = parseKey(setClass, configurationProperties.prefix(), key);
+                    values.put(fieldName, value);
                     componentConfigProperties.put(setClass.getName(), JSON.toJSONString(values));
                     iterator.remove();
                 }
@@ -128,6 +131,28 @@ public class InitializeUtil {
         combineResultMap.putAll(propertyList.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         combineResultMap.putAll(componentConfigProperties);
         return combineResultMap;
+    }
+
+    /**
+     * 对于组件配置的键，默认去除前缀后的值作为键。如用户定义了 @JSONField 注解则使用其 name 字段作为属性的键。
+     *
+     * @param prefix
+     * @param key
+     * @return
+     */
+    private static String parseKey(Class<?> setClass, String prefix, String key) {
+        String fieldName = key.replaceAll(prefix, "");
+        try {
+            Field field = setClass.getDeclaredField(fieldName);
+            JSONField jsonField = field.getAnnotation(JSONField.class);
+            if (jsonField == null) {
+                return fieldName;
+            }
+            fieldName = jsonField.name();
+        } catch (NoSuchFieldException e) {
+            //ignore
+        }
+        return fieldName;
     }
 
 

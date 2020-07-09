@@ -8,9 +8,11 @@ package com.bugjc.flink.config;
  * @author aoki
  * @date 2020/7/8
  **/
-public interface Config {
+public abstract class AbstractConfig implements Config {
     /**
      * 配置属性初始化后自动执行此方法
      */
-    void init();
+    @Override
+    public void init() {
+    }
 }
