@@ -80,7 +80,7 @@ class EnvironmentConfigTest {
 
     @Test
     void get() {
-        log.info("application name：{}", environmentConfig.get("flink.application.name"));
+        log.info("application name：{}", environmentConfig.getParameterTool().get("flink.application.name"));
     }
 
     @Test

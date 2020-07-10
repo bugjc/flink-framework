@@ -5,20 +5,26 @@
     <parent>
         <artifactId>flink-connector</artifactId>
         <groupId>com.bugjc.flink.connector</groupId>
-        <version>1.0</version>
+        <version>1.10.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jdbc-connector</artifactId>
     <groupId>com.bugjc.flink.connector.jdbc</groupId>
-    <version>1.0</version>
+    <version>1.10.0</version>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>com.bugjc.flink.config</groupId>
             <artifactId>flink-config</artifactId>
-            <version>1.0</version>
+            <version>1.10.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-java</artifactId>
+            <version>${flink.version}</version>
         </dependency>
 
         <dependency>

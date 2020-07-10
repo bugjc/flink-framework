@@ -86,14 +86,4 @@ public class EnvironmentConfig implements Serializable {
         return t;
     }
 
-    /**
-     * 获取指定 key 的值
-     *
-     * @param key
-     * @return
-     */
-    public String get(String key) {
-        return this.parameterTool.get(key);
-    }
-
 }

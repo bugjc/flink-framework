@@ -31,6 +31,11 @@ public class DataSourceConfig extends AbstractConfig implements Serializable {
     private int minIdle;
 
     /**
+     * 每次批量插入的大小（可选），默认：5000
+     */
+    private int batchSize = 5000;
+
+    /**
      * 数据源工厂对象
      */
     private transient DataSourceConfigFactory dataSourceConfigFactory;

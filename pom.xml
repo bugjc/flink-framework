@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.bugjc.flink</groupId>
-    <artifactId>flink-learning</artifactId>
+    <artifactId>flink-framework</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.10.0</version>
     <modules>
         <module>flink-config</module>
         <module>flink-connector</module>
@@ -64,7 +64,14 @@
                     <encoding>UTF8</encoding>
                 </configuration>
             </plugin>
+            <!--统一项目版本-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.7</version>
+            </plugin>
         </plugins>
     </build>
+
 
 </project>
