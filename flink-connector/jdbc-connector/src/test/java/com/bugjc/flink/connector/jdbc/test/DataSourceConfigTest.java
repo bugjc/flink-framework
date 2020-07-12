@@ -3,7 +3,7 @@ package com.bugjc.flink.connector.jdbc.test;
 import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.connector.jdbc.DataSourceConfig;
-import com.bugjc.flink.connector.jdbc.JdbcInsertBatch;
+import com.bugjc.flink.connector.jdbc.JdbcInsertBatchSink;
 import com.bugjc.flink.connector.jdbc.test.entity.JobEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.shaded.curator.org.apache.curator.shaded.com.google.common.collect.Lists;
@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -41,12 +42,11 @@ class DataSourceConfigTest {
     @Test
     void getDataSourceConfig() {
         DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class);
-        log.info("getDataSourceConfigFactory：{}", dataSourceConfig.getDataSourceConfigFactory());
+        log.info("getDataSourceConfigFactory：{}", dataSourceConfig.getDataSource());
         String dataSourceConfigJson = JSON.toJSONString(dataSourceConfig);
         log.info("DataSource 配置信息：{}", dataSourceConfigJson);
         dataSourceConfig = JSON.parseObject(dataSourceConfigJson, DataSourceConfig.class);
-        dataSourceConfig.init();
-        log.info("getDataSourceConfigFactory：{}", dataSourceConfig.getDataSourceConfigFactory());
+        log.info("getDataSourceConfigFactory：{}", dataSourceConfig.getDataSource());
     }
 
     @Test
@@ -58,9 +58,9 @@ class DataSourceConfigTest {
             @Override
             public void run(SourceContext<JobEntity> ctx) throws Exception {
                 for (int i = 0; i < 100; i++) {
-                    JobEntity jobEntity = new JobEntity("aoki" + i, i, System.currentTimeMillis());
+                    JobEntity jobEntity = new JobEntity("aoki" + i, i, new Date());
                     ctx.collect(jobEntity);
-                    Thread.sleep(500);
+                    Thread.sleep(200);
                 }
             }
 
@@ -69,7 +69,7 @@ class DataSourceConfigTest {
 
             }
 
-        });
+        }).setParallelism(1);
 
         //时间窗口内汇集数据
         SingleOutputStreamOperator<List<JobEntity>> streamOperator = dataStreamSource.timeWindowAll(Time.seconds(2)).apply(new AllWindowFunction<JobEntity, List<JobEntity>, TimeWindow>() {
@@ -84,10 +84,14 @@ class DataSourceConfigTest {
 
         });
 
-        //sink TODO 待整理、封装
-        JdbcInsertBatch<List<JobEntity>> jdbcInsertBatch = new JdbcInsertBatch<List<JobEntity>>(environmentConfig.getComponent(DataSourceConfig.class),new SampleJdbcInsertBatchProcessor());
-        streamOperator.addSink(jdbcInsertBatch);
+        //sink
+        DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class);
+        //String sql = "insert into tbs_job(job_id, exec_time, status) values(?, ?)";
+        JdbcInsertBatchSink<JobEntity> jdbcInsertBatchSink = dataSourceConfig.getJdbcInsertBatchSink();
+        streamOperator.addSink(jdbcInsertBatchSink);
 
         env.execute("test");
     }
+
+
 }

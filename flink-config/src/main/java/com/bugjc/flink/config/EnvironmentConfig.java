@@ -78,11 +78,6 @@ public class EnvironmentConfig implements Serializable {
         if (t == null) {
             throw new NullPointerException("this class is not a component!");
         }
-
-        if (t instanceof AbstractConfig) {
-            AbstractConfig config = (AbstractConfig) t;
-            config.init();
-        }
         return t;
     }
 

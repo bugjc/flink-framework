@@ -2,7 +2,6 @@ package com.bugjc.flink.connector.kafka;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
-import com.bugjc.flink.config.AbstractConfig;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 @ConfigurationProperties(prefix = "flink.kafka.consumer.")
-public class KafkaConsumerConfig extends AbstractConfig implements Serializable {
+public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements Serializable {
 
     @JSONField(name = "bootstrap.servers")
     private String bootstrapServers;
@@ -54,8 +53,8 @@ public class KafkaConsumerConfig extends AbstractConfig implements Serializable 
      *
      * @return
      */
-    @JSONField(serialize = false)
-    private Properties getProperties() {
+    @Override
+    public Properties getProperties() {
         return JSON.parseObject(JSON.toJSONString(this), Properties.class);
     }
 
@@ -66,8 +65,8 @@ public class KafkaConsumerConfig extends AbstractConfig implements Serializable 
      * @param <T>
      * @return
      */
-    @JSONField(serialize = false)
-    private <T> KafkaEventSchema<T> getKafkaEventSchema(Class<T> eventClass) {
+    @Override
+    public <T> KafkaEventSchema<T> getKafkaEventSchema(Class<T> eventClass) {
         return new KafkaEventSchema<T>(eventClass);
     }
 
@@ -78,7 +77,7 @@ public class KafkaConsumerConfig extends AbstractConfig implements Serializable 
      * @param <T>        --实体对象泛型类型
      * @return
      */
-    @JSONField(serialize = false)
+    @Override
     public <T> FlinkKafkaConsumer011<T> getKafkaConsumer(Class<T> eventClass) {
         Pattern pattern = Pattern.compile(this.topic);
         if (pattern.matcher(pattern.pattern()).matches()) {

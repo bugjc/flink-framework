@@ -1,22 +1,20 @@
 package com.bugjc.flink.connector.jdbc.test.entity;
 
+import com.bugjc.flink.connector.jdbc.annotation.TableField;
+import com.bugjc.flink.connector.jdbc.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @Data
+@AllArgsConstructor
+@TableName("tbs_job")
 public class JobEntity implements Serializable {
-    private int id;
-    private String word;
-    private int frequency;
-    private long timestamp;
-
-    public JobEntity() {
-    }
-
-    public JobEntity(String word, int frequency, long timestamp) {
-        this.word = word;
-        this.frequency = frequency;
-        this.timestamp = timestamp;
-    }
+    @TableField("job_id")
+    private String jobId;
+    private int status;
+    @TableField("exec_time")
+    private Date execTime;
 }

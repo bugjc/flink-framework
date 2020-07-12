@@ -1,13 +1,15 @@
 package com.bugjc.flink.connector.jdbc;
 
-import com.bugjc.flink.config.AbstractConfig;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
+import com.bugjc.flink.connector.jdbc.connection.BasicDataSource;
 import com.bugjc.flink.connector.jdbc.factory.DataSourceConfigFactory;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * 数据源组件配置
@@ -19,7 +21,7 @@ import java.io.Serializable;
 @Data
 @Slf4j
 @ConfigurationProperties(prefix = "flink.datasource.")
-public class DataSourceConfig extends AbstractConfig implements Serializable {
+public class DataSourceConfig extends AbstractDataSourceConfig implements Serializable {
 
     private String driverClassName;
     private String url;
@@ -36,13 +38,48 @@ public class DataSourceConfig extends AbstractConfig implements Serializable {
     private int batchSize = 5000;
 
     /**
-     * 数据源工厂对象
+     * 获取数据源对象
+     * @return
      */
-    private transient DataSourceConfigFactory dataSourceConfigFactory;
-
     @Override
-    public synchronized void init() {
-        //配置属性初始化的时候自动执行此方法
-        this.dataSourceConfigFactory = new DataSourceConfigFactory().createDataSource(this);
+    public BasicDataSource getDataSource(){
+        return DataSourceConfigFactory.createDataSource(this);
+    }
+
+    /**
+     * 获取连接对象
+     * @return
+     * @throws SQLException
+     */
+    @Override
+    public Connection getConnection() throws SQLException {
+        return DataSourceConfigFactory.getConnection(this);
+    }
+
+    /**
+     * 关闭数据源对象
+     */
+    @Override
+    public void close() throws SQLException {
+        DataSourceConfigFactory.close(this);
+    }
+
+    /**
+     * 获取一个批量插入数据到数据库的 sink 函数
+     * @param <T>   --数据库实体对象
+     * @return
+     */
+    public <T> JdbcInsertBatchSink<T> getJdbcInsertBatchSink() {
+        return new JdbcInsertBatchSink<T>(this);
+    }
+
+    /**
+     * 获取一个批量插入数据到数据库的 sink 函数
+     * @param sql   --批量插入数据 SQL
+     * @param <T>   --数据库实体对象
+     * @return
+     */
+    public <T> JdbcInsertBatchSink<T> getJdbcInsertBatchSink(String sql) {
+        return new JdbcInsertBatchSink<T>(this, sql);
     }
 }
