@@ -38,16 +38,23 @@ public class DataSourceConfig extends AbstractDataSourceConfig implements Serial
     private int batchSize = 5000;
 
     /**
+     * （临时）当前将要执行的 SQL
+     */
+    private String sql;
+
+    /**
      * 获取数据源对象
+     *
      * @return
      */
     @Override
-    public BasicDataSource getDataSource(){
+    public BasicDataSource getDataSource() {
         return DataSourceConfigFactory.createDataSource(this);
     }
 
     /**
      * 获取连接对象
+     *
      * @return
      * @throws SQLException
      */
@@ -66,20 +73,23 @@ public class DataSourceConfig extends AbstractDataSourceConfig implements Serial
 
     /**
      * 获取一个批量插入数据到数据库的 sink 函数
-     * @param <T>   --数据库实体对象
+     *
+     * @param <T> --数据库实体对象
      * @return
      */
-    public <T> JdbcInsertBatchSink<T> getJdbcInsertBatchSink() {
+    public <T> JdbcInsertBatchSink<T> createJdbcInsertBatchSink() {
         return new JdbcInsertBatchSink<T>(this);
     }
 
     /**
      * 获取一个批量插入数据到数据库的 sink 函数
-     * @param sql   --批量插入数据 SQL
-     * @param <T>   --数据库实体对象
+     *
+     * @param sql --批量插入数据 SQL
+     * @param <T> --数据库实体对象
      * @return
      */
-    public <T> JdbcInsertBatchSink<T> getJdbcInsertBatchSink(String sql) {
-        return new JdbcInsertBatchSink<T>(this, sql);
+    public <T> JdbcInsertBatchSink<T> createJdbcInsertBatchSink(String sql) {
+        this.setSql(sql);
+        return createJdbcInsertBatchSink();
     }
 }

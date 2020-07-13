@@ -14,6 +14,16 @@
     <version>1.10.0</version>
     <packaging>jar</packaging>
 
+    <repositories>
+        <repository>
+            <id>jsqlparser-snapshots</id>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <url>https://oss.sonatype.org/content/groups/public/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.bugjc.flink.config</groupId>
@@ -39,6 +49,7 @@
             <version>${hutool-all.version}</version>
         </dependency>
 
+        <!--可选的数据库连接池依赖包-->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
@@ -46,13 +57,19 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
             <version>${commons-dbcp2.version}</version>
             <scope>compile</scope>
             <optional>true</optional>
+        </dependency>
+
+        <!--SQL parser -->
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>${jsqlparser.version}</version>
         </dependency>
 
         <dependency>

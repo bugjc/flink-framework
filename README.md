@@ -10,15 +10,15 @@
 
 ## 二、使用步骤
 
-#### 1. 在 resource 目录下创建环境配置文件 `application.properties`.
+### 1. 在 resource 目录下创建环境配置文件 `application.properties`.
 如果项目中分了多个配置文件可以通过在 `application.properties` 文件中增加如下配置来加载指定配置文件.
 ```
 # 其中 dev 表示加载 `application-dev.properties` 配置文件，要加载多个配置文件可以使用逗号分隔
 flink.profiles.active=dev
 ```
 
-#### 2. 获取环境配置
-##### 添加 Maven 依赖
+### 2. 获取环境配置
+#### 添加 Maven 依赖
 ```
 <dependency>
     <groupId>com.bugjc.flink.config</groupId>
@@ -26,14 +26,14 @@ flink.profiles.active=dev
     <version>1.10.0</version>
 </dependency>
 ```
-##### Main 构建环境配置
+#### Main 构建环境配置
 ```
 EnvironmentConfig environmentConfig = new EnvironmentConfig(args);
 final StreamExecutionEnvironment env = environmentConfig.getStreamExecutionEnvironment();
 ```
 
-#### 3. 获取 JDBC 连接器（可选）
-##### 添加 Maven 依赖
+### 3. 获取 JDBC 连接器（可选）
+#### 添加 Maven 依赖
 ```
 <dependency>
     <groupId>com.bugjc.flink.connector.jdbc</groupId>
@@ -42,7 +42,7 @@ final StreamExecutionEnvironment env = environmentConfig.getStreamExecutionEnvir
 </dependency>
 ```
 
-##### 在配置文件中增加如下配置属性.
+#### 配置属性
 ```
 # 数据源配置:off
 flink.datasource.driverClassName=com.mysql.cj.jdbc.Driver
@@ -55,12 +55,37 @@ flink.datasource.maxTotal=50
 flink.datasource.minIdle=2
 # 数据源配置:on
 ```
-##### 配置好后，代码中通过如下方法获取 JDBC 连接器：
+#### 获取 JDBC 连接器
 ```
 DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class))
 ```
 
-#### 4. 获取 kafka 连接器（可选）
+#### 获取 JDBC SinkFunction
+```
+## 方式一：自定义 SQL
+String sql = "insert ignore into tbs_job(job_id, status) values(?, ?)";
+dataSourceConfig.createJdbcInsertBatchSink(sql);
+
+## 方式二：自动生成 SQL
+dataSourceConfig.createJdbcInsertBatchSink();
+```
+无论是使用哪种方式获取 `SinkFunction` 都需要建立插入的实体对象映射关系，具体示例如下所示：
+```
+@Data
+@AllArgsConstructor
+@TableName("tbs_job")
+public class JobEntity implements Serializable {
+    @TableField("job_id")
+    private String jobId;
+    private int status;
+    @TableField("exec_time")
+    private Date execTime;
+}
+```
+使用 `@TableName` 和 `@TableField` 注解分别指明实体对象与数据库对象之间的映射关系。
+
+### 4. 获取 kafka 连接器（可选）
+#### 添加 Maven 依赖
 ```
 <dependency>
     <groupId>com.bugjc.flink.connector.kafka</groupId>
@@ -69,7 +94,10 @@ DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceCon
 </dependency>
 ```
 
-##### kafka 连接器分 消费者 和 生产者 两种.对于消费者连接器需要配置如下属性:
+#### 获取 Kafka 连接器
+Kafka 连接器分 `消费者` 和 `生产者` 两种.
+##### 消费者连接器配置和使用
+在配置文件中增加如下`消费者`连接器配置:
 ```
 # kafka 消费者配置:off
 flink.kafka.consumer.bootstrap.servers=192.168.0.103:9092
@@ -83,13 +111,12 @@ flink.kafka.consumer.automaticPartition=10000
 flink.kafka.consumer.topic=testTopicPartition-[0-9]
 # kafka 消费者配置:on
 ```
-
-##### 配置好后，代码中通过如下方法获取消费者连接器：
+使用如下代码获取消费者连接器：
 ```
 KafkaConsumerConfig kafkaConsumerConfig = environmentConfig.getComponent(KafkaConsumerConfig.class);
 FlinkKafkaConsumer011<KafkaEvent> consumer011 = kafkaConsumerConfig.getKafkaConsumer(KafkaEvent.class);
 ```
-##### 备注
+###### 备注
 配置文件中的 `flink.kafka.consumer.topic `参数值有三类，分别对应：`单 topic`、`多 topic` 和 `topic 正则表达式`消费数据的方式。
      * 例：单 topic --> testTopicName;多 topic --> testTopicName,testTopicName1;topic 正则表达式 --> testTopicName[0-9].
      

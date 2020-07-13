@@ -3,7 +3,6 @@ package com.bugjc.flink.connector.jdbc.test;
 import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.connector.jdbc.DataSourceConfig;
-import com.bugjc.flink.connector.jdbc.JdbcInsertBatchSink;
 import com.bugjc.flink.connector.jdbc.test.entity.JobEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.shaded.curator.org.apache.curator.shaded.com.google.common.collect.Lists;
@@ -86,10 +85,8 @@ class DataSourceConfigTest {
 
         //sink
         DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class);
-        //String sql = "insert into tbs_job(job_id, exec_time, status) values(?, ?)";
-        JdbcInsertBatchSink<JobEntity> jdbcInsertBatchSink = dataSourceConfig.getJdbcInsertBatchSink();
-        streamOperator.addSink(jdbcInsertBatchSink);
-
+        String sql = "insert ignore into tbs_job(job_id, status) values(?, ?)";
+        streamOperator.addSink(dataSourceConfig.createJdbcInsertBatchSink(sql));
         env.execute("test");
     }
 
