@@ -1,4 +1,4 @@
-package com.bugjc.flink.connector.kafka;
+package com.bugjc.flink.connector.kafka.schema;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
@@ -13,11 +13,11 @@ import java.io.IOException;
  * @author aoki
  * @date 2020/7/1
  **/
-public class KafkaEventSchema<T> implements DeserializationSchema<T>, SerializationSchema<T> {
+public class GeneralKafkaSchema<T> implements DeserializationSchema<T>, SerializationSchema<T> {
 
     private final Class<T> eventClass;
 
-    public KafkaEventSchema(Class<T> eventClass) {
+    public GeneralKafkaSchema(Class<T> eventClass) {
         this.eventClass = eventClass;
     }
     

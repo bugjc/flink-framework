@@ -3,7 +3,11 @@ package com.bugjc.flink.config.util;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.bugjc.flink.config.Config;
+import com.bugjc.flink.config.annotation.Application;
+import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
+import com.bugjc.flink.config.exception.ApplicationContextException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.reflections.Reflections;
@@ -20,6 +24,7 @@ import java.util.stream.Collectors;
  * @author aoki
  * @date 2020/7/8
  **/
+@Slf4j
 public class InitializeUtil {
 
     private static final String ENV_PROPERTY_NAME = "flink.profiles.active";
@@ -32,6 +37,7 @@ public class InitializeUtil {
      * @throws IOException
      */
     public static ParameterTool loadUserProperties(String[] args) throws IOException {
+
         ParameterTool parameterTool = ParameterTool.fromPropertiesFile(InputStreamUtil.getDefaultPropertiesInputStream());
         String envNameStr = parameterTool.get(ENV_PROPERTY_NAME);
         if (StringUtils.isBlank(envNameStr)) {
@@ -57,15 +63,13 @@ public class InitializeUtil {
      * 扫描出配置文件类。
      * 查找出定义了 @ConfigProperty 注解、且直接或间接实现了 Config 接口类的 class.
      *
-     * @param parameterTool
      * @return
      */
-    public static Set<Class<?>> scanConfig(ParameterTool parameterTool) {
+    public static Set<Class<?>> scanConfig() {
         //扫描项目配置的基本包路径
-        String scanBasePackages = parameterTool.get(SCAN_BASE_PACKAGES);
-        if (StringUtils.isBlank(scanBasePackages)) {
-            //未配置默认扫描启动类 Main 路径下的配置文件
-            scanBasePackages = Objects.requireNonNull(deduceMainApplicationClass()).getPackage().getName();
+        Set<String> scanBasePackages = findApplicationPackages();
+        if (scanBasePackages.isEmpty()) {
+            throw new ApplicationContextException("启动类缺少 @Application 或 @ApplicationTest 注解");
         }
 
         Reflections reflections;
@@ -173,5 +177,52 @@ public class InitializeUtil {
             // Swallow and continue
         }
         return null;
+    }
+
+    /**
+     * 查找注解 @Application or @ ApplicationTest 所在包路径
+     *
+     * @return
+     */
+    private static Set<String> findApplicationPackages() {
+        Set<String> treeSet = new TreeSet<>();
+        StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
+        for (StackTraceElement stackTraceElement : stackTrace) {
+            String className = stackTraceElement.getClassName();
+            if (className.startsWith("sun.")) {
+                continue;
+            } else if (className.startsWith("java.")) {
+                continue;
+            } else if (className.startsWith("org.")) {
+                continue;
+            }
+
+            Class<?> currentClassName = null;
+            try {
+                currentClassName = Class.forName(stackTraceElement.getClassName());
+            } catch (ClassNotFoundException ex) {
+                log.warn(ex.getMessage());
+                continue;
+            }
+
+            ApplicationTest applicationTest = currentClassName.getAnnotation(ApplicationTest.class);
+            if (applicationTest != null) {
+                treeSet.add(currentClassName.getPackage().getName());
+                if (applicationTest.classes().length != 0) {
+                    Arrays.stream(applicationTest.classes()).forEach(appClass -> {
+                        treeSet.add(appClass.getPackage().getName());
+                    });
+                }
+            }
+
+            Application application = currentClassName.getAnnotation(Application.class);
+            if (application != null) {
+                treeSet.add(currentClassName.getPackage().getName());
+                if (application.scanBasePackages().length != 0) {
+                    treeSet.addAll(Arrays.asList(application.scanBasePackages()));
+                }
+            }
+        }
+        return treeSet;
     }
 }

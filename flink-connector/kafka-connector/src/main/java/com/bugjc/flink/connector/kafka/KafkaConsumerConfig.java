@@ -2,7 +2,10 @@ package com.bugjc.flink.connector.kafka;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.annotation.JSONType;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
+import com.bugjc.flink.connector.kafka.config.AbstractKafkaConsumerConfig;
+import com.bugjc.flink.connector.kafka.schema.GeneralKafkaSchema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +26,12 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
+@JSONType(includes = {"bootstrapServers","groupId","keyDeserializer","valueDeserializer","autoOffsetReset","automaticPartition"})
 @ConfigurationProperties(prefix = "flink.kafka.consumer.")
 public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements Serializable {
 
     @JSONField(name = "bootstrap.servers")
     private String bootstrapServers;
-    @JSONField(name = "zookeeper.connect")
-    private String zookeeperConnect;
     @JSONField(name = "group.id")
     private String groupId;
     @JSONField(name = "key.deserializer")
@@ -54,6 +56,7 @@ public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements 
      * @return
      */
     @Override
+    @JSONField(serialize = false)
     public Properties getProperties() {
         return JSON.parseObject(JSON.toJSONString(this), Properties.class);
     }
@@ -66,8 +69,8 @@ public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements 
      * @return
      */
     @Override
-    public <T> KafkaEventSchema<T> getKafkaEventSchema(Class<T> eventClass) {
-        return new KafkaEventSchema<T>(eventClass);
+    public <T> GeneralKafkaSchema<T> createGeneralKafkaSchema(Class<T> eventClass) {
+        return new GeneralKafkaSchema<T>(eventClass);
     }
 
     /**
@@ -78,20 +81,20 @@ public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements 
      * @return
      */
     @Override
-    public <T> FlinkKafkaConsumer011<T> getKafkaConsumer(Class<T> eventClass) {
+    public <T> FlinkKafkaConsumer011<T> createKafkaSource(Class<T> eventClass) {
         Pattern pattern = Pattern.compile(this.topic);
         if (pattern.matcher(pattern.pattern()).matches()) {
             //使用 单topic 或 多topic
             return new FlinkKafkaConsumer011<T>(
                     Arrays.stream(this.topic.split(",")).map(String::trim).collect(Collectors.toList()),
-                    getKafkaEventSchema(eventClass),
+                    this.createGeneralKafkaSchema(eventClass),
                     this.getProperties());
         }
 
         //使用 Topic 发现
         return new FlinkKafkaConsumer011<T>(
                 pattern,
-                getKafkaEventSchema(eventClass),
+                this.createGeneralKafkaSchema(eventClass),
                 this.getProperties());
 
     }

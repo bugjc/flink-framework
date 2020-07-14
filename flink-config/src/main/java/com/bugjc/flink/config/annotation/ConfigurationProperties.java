@@ -21,5 +21,5 @@ public @interface ConfigurationProperties {
      *
      * @return
      */
-    String prefix() default "";
+    String prefix();
 }

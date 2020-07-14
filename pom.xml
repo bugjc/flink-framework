@@ -11,6 +11,7 @@
     <modules>
         <module>flink-config</module>
         <module>flink-connector</module>
+        <module>flink-test</module>
     </modules>
 
 

@@ -1,6 +1,7 @@
 package com.bugjc.flink.connector.kafka.test;
 
 import com.bugjc.flink.config.EnvironmentConfig;
+import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.connector.kafka.KafkaConsumerConfig;
 import com.bugjc.flink.connector.kafka.test.event.KafkaEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
+@ApplicationTest
 class KafkaConsumerConfigTest {
     /**
      * 构建环境配置文件对象
@@ -32,7 +34,7 @@ class KafkaConsumerConfigTest {
         StreamExecutionEnvironment env = environmentConfig.getStreamExecutionEnvironment();
         KafkaConsumerConfig kafkaConsumerConfig = environmentConfig.getComponent(KafkaConsumerConfig.class);
         log.info("KafkaConsumerConfig 配置信息：{}", kafkaConsumerConfig);
-        FlinkKafkaConsumer011<KafkaEvent> consumer011 = kafkaConsumerConfig.getKafkaConsumer(KafkaEvent.class);
+        FlinkKafkaConsumer011<KafkaEvent> consumer011 = kafkaConsumerConfig.createKafkaSource(KafkaEvent.class);
         log.info("{}", consumer011);
 
         SingleOutputStreamOperator<KafkaEvent> kafkaEventSource = env

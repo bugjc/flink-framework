@@ -2,6 +2,8 @@ package com.bugjc.flink.config;
 
 import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.util.InitializeUtil;
+import com.bugjc.flink.config.util.StopWatch;
+import com.esotericsoftware.minlog.Log;
 import lombok.Getter;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -31,18 +33,24 @@ public class EnvironmentConfig implements Serializable {
      * @throws Exception
      */
     public EnvironmentConfig(final String[] args) throws Exception {
+        String method = Thread.currentThread().getStackTrace()[1].getMethodName();
+        StopWatch stopWatch = new StopWatch(method);
+        stopWatch.start();
 
         //加载用户配置
         ParameterTool parameterTool = InitializeUtil.loadUserProperties(args);
 
         //获取配置文件类
-        Set<Class<?>> setClasses = InitializeUtil.scanConfig(parameterTool);
+        Set<Class<?>> setClasses = InitializeUtil.scanConfig();
 
         //解析自定义参数
         Map<String, String> propertiesMap = InitializeUtil.parseConfig(parameterTool, setClasses);
 
         //将属性集暴露出去
         this.parameterTool = ParameterTool.fromMap(propertiesMap);
+
+        stopWatch.stop();
+        Log.info(stopWatch.prettyPrint());
     }
 
     /**
