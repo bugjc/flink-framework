@@ -162,8 +162,8 @@ FlinkKafkaProducer011<KafkaEvent> producer011 = kafkaProducerConfig.createKafkaS
 #### 1. 添加 Maven 依赖
 ```
 <dependency>
-    <groupId>com.bugjc.flink.connector.kafka</groupId>
-    <artifactId>kafka-connector</artifactId>
+    <groupId>com.bugjc.flink.config</groupId>
+    <artifactId>flink-config</artifactId>
     <version>1.10.0</version>
 </dependency>
 ```
@@ -198,3 +198,7 @@ public class CustomConfig implements Config, Serializable {
 - 在 resource 目录下创建目录 `./resources/META-INF/services/`
 - 在 `./resources/META-INF/services/` 目下下 创建 `com.bugjc.flink.config.Config` 文件
 - 最后在将 `com.bugjc.flink.config.Config` 文件的内容填上一步的完整包路径加类名，如：`com.xxx.custom.CustomConfig`。
+
+
+TODO  
+- 重载组件
