@@ -5,13 +5,13 @@
     <parent>
         <artifactId>flink-framework</artifactId>
         <groupId>com.bugjc.flink</groupId>
-        <version>1.10.0</version>
+        <version>1.11.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>flink-test</artifactId>
     <groupId>com.bugjc.flink.test</groupId>
-    <version>1.10.0</version>
+    <version>1.11.0</version>
     <packaging>jar</packaging>
 
     <profiles>
@@ -35,12 +35,12 @@
         <dependency>
             <groupId>com.bugjc.flink.connector.jdbc</groupId>
             <artifactId>jdbc-connector</artifactId>
-            <version>${flink.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.bugjc.flink.connector.kafka</groupId>
             <artifactId>kafka-connector</artifactId>
-            <version>${flink.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Add logging framework, to produce console output when running in the IDE. -->

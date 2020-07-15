@@ -5,6 +5,7 @@ import com.bugjc.flink.config.util.InitializeUtil;
 import com.bugjc.flink.config.util.StopWatch;
 import com.esotericsoftware.minlog.Log;
 import lombok.Getter;
+import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import scala.Serializable;
@@ -54,12 +55,22 @@ public class EnvironmentConfig implements Serializable {
     }
 
     /**
-     * 获取流执行环节
+     * 获取流执行环境
      *
      * @return
      */
     public StreamExecutionEnvironment getStreamExecutionEnvironment() {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.getConfig().setGlobalJobParameters(this.getParameterTool());
+        return env;
+    }
+
+    /**
+     * 获取批执行环境
+     * @return
+     */
+    public ExecutionEnvironment getExecutionEnvironment() {
+        final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
         env.getConfig().setGlobalJobParameters(this.getParameterTool());
         return env;
     }

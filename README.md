@@ -8,16 +8,20 @@
 - jdbc-connector（JDBC 连接器）
 - kafka-connector（Kafka 连接器）
 
+### flink-test（功能测试）
+- kafka.app（Kafka 相关功能测试）
+- mysql.app（MySQL 相关功能测试）
+
 ## 二、使用步骤
 
-### 1. 在 resource 目录下创建环境配置文件 `application.properties`.
-如果项目中分了多个配置文件可以通过在 `application.properties` 文件中增加如下配置来加载指定配置文件.
+### 1. 配置
+在 resource 目录下创建环境配置文件 `application.properties`.如果项目中分了多个配置文件可以通过在 `application.properties` 文件中增加如下配置来加载指定配置文件.
 ```
 # 其中 dev 表示加载 `application-dev.properties` 配置文件，要加载多个配置文件可以使用逗号分隔
 flink.profiles.active=dev
 ```
 
-### 2. 获取环境配置
+### 2. 启动 Flink 应用
 #### 添加 Maven 依赖
 ```
 <dependency>
@@ -26,13 +30,27 @@ flink.profiles.active=dev
     <version>1.10.0</version>
 </dependency>
 ```
-#### Main 构建环境配置
+#### Main 方法中初始化环境
+示例：
 ```
-EnvironmentConfig environmentConfig = new EnvironmentConfig(args);
-final StreamExecutionEnvironment env = environmentConfig.getStreamExecutionEnvironment();
+@Application
+public class ConfigApplication {
+
+    public static void main(String[] args) throws Exception {
+        //1.环境参数配置
+        EnvironmentConfig environmentConfig = new EnvironmentConfig(args);
+        final ExecutionEnvironment env = environmentConfig.getExecutionEnvironment();
+
+        //2.使用配置值作为数据源
+        DataSource<String> dataSource = env.fromCollection(env.getConfig().getGlobalJobParameters().toMap().values());
+
+        //3.打印
+        dataSource.print();
+    }
+}
 ```
 
-### 3. 获取 JDBC 连接器（可选）
+### 3. JDBC 连接器（可选）
 #### 添加 Maven 依赖
 ```
 <dependency>
@@ -84,7 +102,7 @@ public class JobEntity implements Serializable {
 ```
 使用 `@TableName` 和 `@TableField` 注解分别指明实体对象与数据库对象之间的映射关系。
 
-### 4. 获取 kafka 连接器（可选）
+### 4. kafka 连接器（可选）
 #### 添加 Maven 依赖
 ```
 <dependency>
@@ -95,9 +113,10 @@ public class JobEntity implements Serializable {
 ```
 
 #### 获取 Kafka 连接器
-Kafka 连接器分 `消费者` 和 `生产者` 两种.
-##### 消费者连接器配置和使用
-在配置文件中增加如下`消费者`连接器配置:
+Kafka 连接器分 `Consumer` 和 `Producer` 两种.
+
+##### Kafka Consumer SourceFunction
+在配置文件中增加如下 `Consumer` 配置:
 ```
 # kafka 消费者配置:off
 flink.kafka.consumer.bootstrap.servers=192.168.0.103:9092
@@ -111,15 +130,33 @@ flink.kafka.consumer.automaticPartition=10000
 flink.kafka.consumer.topic=testTopicPartition-[0-9]
 # kafka 消费者配置:on
 ```
-使用如下代码获取消费者连接器：
+使用如下代码获取 `SourceFunction`：
 ```
 KafkaConsumerConfig kafkaConsumerConfig = environmentConfig.getComponent(KafkaConsumerConfig.class);
 FlinkKafkaConsumer011<KafkaEvent> consumer011 = kafkaConsumerConfig.getKafkaConsumer(KafkaEvent.class);
 ```
-###### 备注
+
+备注:  
 配置文件中的 `flink.kafka.consumer.topic `参数值有三类，分别对应：`单 topic`、`多 topic` 和 `topic 正则表达式`消费数据的方式。
      * 例：单 topic --> testTopicName;多 topic --> testTopicName,testTopicName1;topic 正则表达式 --> testTopicName[0-9].
-     
-     
+
+##### Kafka Producer SinkFunction
+在配置文件中增加如下 `Consumer` 配置:
+```
+# kafka 生产者配置:off
+flink.kafka.producer.bootstrap.servers=192.168.0.103:9092
+flink.kafka.producer.key.serializer=org.apache.kafka.common.serialization.StringSerializer
+flink.kafka.producer.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+flink.kafka.producer.topic=KafkaEvent-1
+# kafka 生产者配置:on
+```
+使用如下代码获取 `SinkFunction`：
+```
+KafkaProducerConfig kafkaProducerConfig = environmentConfig.getComponent(KafkaProducerConfig.class);
+FlinkKafkaProducer011<KafkaEvent> producer011 = kafkaProducerConfig.createKafkaSink(KafkaEvent.class);
+```
+为了便于测试可通过调用 `kafkaProducerConfig.createKafkaProducer()` 方法快速创建一个 kafka 生产者来发送测试数据。
+   
+
 ## 三、自定义连接器
 TODO

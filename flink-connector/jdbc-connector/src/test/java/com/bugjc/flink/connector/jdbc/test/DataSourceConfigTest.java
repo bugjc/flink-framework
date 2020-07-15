@@ -5,7 +5,7 @@ import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.connector.jdbc.DataSourceConfig;
 import com.bugjc.flink.connector.jdbc.test.entity.JobEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.shaded.curator.org.apache.curator.shaded.com.google.common.collect.Lists;
+import org.apache.flink.shaded.curator4.org.apache.curator.shaded.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;

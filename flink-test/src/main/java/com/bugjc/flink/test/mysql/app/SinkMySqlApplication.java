@@ -6,7 +6,7 @@ import com.bugjc.flink.connector.jdbc.DataSourceConfig;
 import com.bugjc.flink.connector.kafka.KafkaConsumerConfig;
 import com.bugjc.flink.test.mysql.app.model.KafkaEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.shaded.curator.org.apache.curator.shaded.com.google.common.collect.Lists;
+import org.apache.flink.shaded.curator4.org.apache.curator.shaded.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
