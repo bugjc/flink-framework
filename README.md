@@ -159,4 +159,42 @@ FlinkKafkaProducer011<KafkaEvent> producer011 = kafkaProducerConfig.createKafkaS
    
 
 ## 三、自定义连接器
-TODO
+#### 1. 添加 Maven 依赖
+```
+<dependency>
+    <groupId>com.bugjc.flink.connector.kafka</groupId>
+    <artifactId>kafka-connector</artifactId>
+    <version>1.10.0</version>
+</dependency>
+```
+
+#### 2. 定义连接器属性
+```
+# 自定义组件配置:off
+custom.property1=value1
+custom.property2=value2
+# 自定义组件配置:on
+```
+
+#### 3. 创建连接器配置入口类
+添加 `@ConfigurationProperties` 和实现 `com.bugjc.flink.config.Config` 空接口。
+```
+/**
+ * 自定义连接器示例
+ * @author aoki
+ * @date 2020/7/15
+ * **/
+@Data
+@ConfigurationProperties(prefix = "custom.")
+public class CustomConfig implements Config, Serializable {
+    private String property1;
+    private String property2;
+
+    //TODO 这里写创建你的连接对象方法
+}
+```
+
+#### 4. 注册连接器配置入口类
+- 在 resource 目录下创建目录 `./resources/META-INF/services/`
+- 在 `./resources/META-INF/services/` 目下下 创建 `com.bugjc.flink.config.Config` 文件
+- 最后在将 `com.bugjc.flink.config.Config` 文件的内容填上一步的完整包路径加类名，如：`com.xxx.custom.CustomConfig`。

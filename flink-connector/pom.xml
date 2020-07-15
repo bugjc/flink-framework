@@ -17,6 +17,7 @@
     <modules>
         <module>jdbc-connector</module>
         <module>kafka-connector</module>
+        <module>custom-connector</module>
     </modules>
 
 </project>
