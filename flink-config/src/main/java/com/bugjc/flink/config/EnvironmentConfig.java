@@ -61,16 +61,19 @@ public class EnvironmentConfig implements Serializable {
      */
     public StreamExecutionEnvironment getStreamExecutionEnvironment() {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //--------设置作业全局参数------
         env.getConfig().setGlobalJobParameters(this.getParameterTool());
         return env;
     }
 
     /**
      * 获取批执行环境
+     *
      * @return
      */
     public ExecutionEnvironment getExecutionEnvironment() {
         final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+        //--------设置作业全局参数------
         env.getConfig().setGlobalJobParameters(this.getParameterTool());
         return env;
     }
