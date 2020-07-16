@@ -1,4 +1,4 @@
-## 一、项目介绍
+## 一、简介
 > 快速开发 Flink 应用
 ### flink-config（管理环境配置文件）
 基于 `Spring Boot` 约定优于配置的编程原则，在结合 `flink` 提供的 `ParameterTool` 工具类而编写的一种简单的配置文件管理工具。
@@ -9,8 +9,9 @@
 - kafka-connector（Kafka 连接器）
 
 ### flink-test（功能测试）
-- kafka.app（Kafka 相关功能测试）
-- mysql.app（MySQL 相关功能测试）
+- config.app（Config 组件功能测试）
+- kafka.app（Kafka 连接器功能测试）
+- mysql.app（MySQL 连接器功能测试）
 
 ## 二、使用步骤
 
@@ -49,6 +50,15 @@ public class ConfigApplication {
     }
 }
 ```
+
+#### 获取属性值
+两种方式，一种是通过 `EnvironmentConfig` 对象包装的 `ParameterTool` 工具类获取配置文件的属性值；具体如下所示：
+
+```
+environmentConfig.getParameterTool().get("Key1")
+```
+
+另一种是运行时在函数内部通过使用此方法获取 ` (ParameterTool)getRuntimeContext().getExecutionConfig().getGlobalJobParameters();`。
 
 ### 3. JDBC 连接器（可选）
 #### 添加 Maven 依赖
@@ -190,15 +200,13 @@ public class CustomConfig implements Config, Serializable {
     private String property1;
     private String property2;
 
-    //TODO 这里写创建你的连接对象方法
+    //TODO 这里写定制连接器创建连接对象方法
 }
 ```
+注意事项:  
+- 配置入口类要能够序列化
 
 #### 4. 注册连接器配置入口类
 - 在 resource 目录下创建目录 `./resources/META-INF/services/`
 - 在 `./resources/META-INF/services/` 目下下 创建 `com.bugjc.flink.config.Config` 文件
 - 最后在将 `com.bugjc.flink.config.Config` 文件的内容填上一步的完整包路径加类名，如：`com.xxx.custom.CustomConfig`。
-
-
-TODO  
-- 重载组件
