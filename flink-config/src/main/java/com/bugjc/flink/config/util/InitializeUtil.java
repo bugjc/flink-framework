@@ -7,6 +7,11 @@ import com.bugjc.flink.config.annotation.Application;
 import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
 import com.bugjc.flink.config.exception.ApplicationContextException;
+import com.bugjc.flink.config.model.application.ApplicationResponse;
+import com.bugjc.flink.config.model.component.NewField;
+import com.bugjc.flink.config.model.component.NewFieldInput;
+import com.bugjc.flink.config.model.component.NewFieldOutput;
+import com.bugjc.flink.config.model.tree.Trie;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -40,21 +45,19 @@ public class InitializeUtil {
 
         ParameterTool parameterTool = ParameterTool.fromPropertiesFile(InputStreamUtil.getDefaultPropertiesInputStream());
         String envNameStr = parameterTool.get(ENV_PROPERTY_NAME);
-        if (StringUtils.isBlank(envNameStr)) {
-            throw new NullPointerException("`flink.profiles.active` attribute value is not configured");
+        if (StringUtils.isNotBlank(envNameStr)) {
+            String[] envNameArr = envNameStr.split(",");
+            for (String envName : envNameArr) {
+                parameterTool = ParameterTool.fromPropertiesFile(InputStreamUtil.getPropertiesInputStream(envName)).mergeWith(parameterTool);
+            }
         }
-
-        String[] envNameArr = envNameStr.split(",");
-        for (String envName : envNameArr) {
-            parameterTool = ParameterTool.fromPropertiesFile(InputStreamUtil.getPropertiesInputStream(envName)).mergeWith(parameterTool);
-        }
-
 
         //最后在加载运行 jar 时用户输入的参数
         if (args != null) {
             parameterTool = ParameterTool.fromArgs(args).mergeWith(parameterTool);
         }
 
+        //系统参数
         parameterTool = ParameterTool.fromSystemProperties().mergeWith(parameterTool);
         return parameterTool;
     }
@@ -67,7 +70,9 @@ public class InitializeUtil {
      */
     public static Set<Class<?>> scanConfig() {
         //扫描项目配置的基本包路径
-        Set<String> scanBasePackages = findApplicationPackages();
+        ApplicationResponse applicationResponse = findApplicationPackages();
+        Set<String> scanBasePackages = applicationResponse.getScanBasePackages();
+        List<Class<?>> excludeList = applicationResponse.getExcludes();
         if (scanBasePackages.isEmpty()) {
             throw new ApplicationContextException("启动类缺少 @Application 或 @ApplicationTest 注解");
         }
@@ -83,10 +88,31 @@ public class InitializeUtil {
 
         ServiceLoader<Config> serviceLoader = ServiceLoader.load(Config.class);
         for (Config config : serviceLoader) {
-            setClasses.add(config.getClass());
+            if (!existExcludeClass(config.getClass(), excludeList)) {
+                setClasses.add(config.getClass());
+            }
         }
 
         return setClasses;
+    }
+
+    /**
+     * 判断扫描路径是否在排除自动扫描的列表项中
+     *
+     * @param c
+     * @param excludeList
+     * @return
+     */
+    private static boolean existExcludeClass(Class<?> c, List<Class<?>> excludeList) {
+        if (excludeList == null) {
+            return false;
+        }
+        for (Class<?> aClass : excludeList) {
+            if (c.equals(aClass)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -102,33 +128,43 @@ public class InitializeUtil {
         List<Map.Entry<String, String>> propertyList = new ArrayList<>(parameterTool.toMap().entrySet());
         propertyList.sort(Map.Entry.comparingByKey());
 
-        //解析属性集合中按规则定义的各个组件配置属性值
-        Map<String, String> componentConfigProperties = new HashMap<>();
-        Map<String, Map<String, String>> tempComponentConfigProperties = new HashMap<>();
+        //构建前缀树
+        for (Map.Entry<String, String> entry : parameterTool.toMap().entrySet()) {
+            Trie.insert(entry.getKey(), entry.getValue());
+        }
 
+        //打印前缀树
+        Trie.print();
+
+        //移除无用的属性
         Iterator<Map.Entry<String, String>> iterator = propertyList.iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, String> map = iterator.next();
             String key = map.getKey();
-            String value = map.getValue();
             for (Class<?> setClass : setClasses) {
                 ConfigurationProperties configurationProperties = setClass.getAnnotation(ConfigurationProperties.class);
                 if (configurationProperties != null && key.startsWith(configurationProperties.prefix())) {
-                    //按注解配置的 prefix 为分组 key，合并成一个属性配置类
-                    if (!tempComponentConfigProperties.containsKey(configurationProperties.prefix())) {
-                        tempComponentConfigProperties.put(configurationProperties.prefix(), new HashMap<>());
-                    }
-
-                    //合并的属性字段默认去掉前缀
-                    Map<String, String> values = tempComponentConfigProperties.get(configurationProperties.prefix());
-                    String fieldName = parseKey(setClass, configurationProperties.prefix(), key);
-                    values.put(fieldName, value);
-                    componentConfigProperties.put(setClass.getName(), JSON.toJSONString(values));
                     iterator.remove();
                 }
             }
-
         }
+
+        //解析属性集合中按规则定义的各个组件配置属性值
+        Map<String, String> componentConfigProperties = new HashMap<>();
+        for (Class<?> setClass : setClasses) {
+            ConfigurationProperties configurationProperties = setClass.getAnnotation(ConfigurationProperties.class);
+            if (configurationProperties != null) {
+
+                NewFieldOutput output = new NewFieldOutput();
+                List<NewField> fields = Arrays.stream(setClass.getDeclaredFields()).map(field -> new NewField(field.getName(), field.getType(), field.getGenericType())).collect(Collectors.toList());
+                NewFieldInput input = new NewFieldInput("None", NewFieldInput.Type.None,configurationProperties.prefix(),fields);
+                ParsingAttributesUtil.deconstruction(input, output);
+
+                componentConfigProperties.put(setClass.getName(), JSON.toJSONString(output.getData()));
+                log.info("Auto load component configuration：{}", JSON.toJSONString(output.getData()));
+            }
+        }
+
 
         //最后，合并属性集合和组件属性集合
         Map<String, String> combineResultMap = new HashMap<String, String>();
@@ -159,33 +195,24 @@ public class InitializeUtil {
         return fieldName;
     }
 
-
     /**
-     * 获取 main 所在路径
+     * 对于组件配置的键，默认去除前缀后的值作为键。如用户定义了 @JSONField 注解则使用其 name 字段作为属性的键。
      *
      * @return
      */
-    private static Class<?> deduceMainApplicationClass() {
-        try {
-            StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
-            for (StackTraceElement stackTraceElement : stackTrace) {
-                if ("main".equals(stackTraceElement.getMethodName())) {
-                    return Class.forName(stackTraceElement.getClassName());
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            // Swallow and continue
-        }
-        return null;
+    private static void buildObjectData(NewFieldOutput newFieldOutput, Class<?> setClass, String prefix) {
+        List<NewField> fields = Arrays.stream(setClass.getDeclaredFields()).map(field -> new NewField(field.getName(), field.getType(), field.getGenericType())).collect(Collectors.toList());
+        NewFieldInput newFieldInput = new NewFieldInput("none", NewFieldInput.Type.None,prefix,fields);
+        ParsingAttributesUtil.deconstruction(newFieldInput, newFieldOutput);
     }
 
     /**
-     * 查找注解 @Application or @ ApplicationTest 所在包路径
+     * 查找注解 @Application or @ ApplicationTest 所在包路径及其它配置信息
      *
      * @return
      */
-    private static Set<String> findApplicationPackages() {
-        Set<String> treeSet = new TreeSet<>();
+    private static ApplicationResponse findApplicationPackages() {
+        ApplicationResponse applicationResponse = new ApplicationResponse();
         StackTraceElement[] stackTrace = new RuntimeException().getStackTrace();
         for (StackTraceElement stackTraceElement : stackTrace) {
             String className = stackTraceElement.getClassName();
@@ -207,22 +234,30 @@ public class InitializeUtil {
 
             ApplicationTest applicationTest = currentClassName.getAnnotation(ApplicationTest.class);
             if (applicationTest != null) {
-                treeSet.add(currentClassName.getPackage().getName());
+                Set<String> scanBasePackagesTreeSet = new TreeSet<>();
+                scanBasePackagesTreeSet.add(currentClassName.getPackage().getName());
                 if (applicationTest.classes().length != 0) {
                     Arrays.stream(applicationTest.classes()).forEach(appClass -> {
-                        treeSet.add(appClass.getPackage().getName());
+                        scanBasePackagesTreeSet.add(appClass.getPackage().getName());
                     });
                 }
+                applicationResponse.setScanBasePackages(scanBasePackagesTreeSet);
             }
 
             Application application = currentClassName.getAnnotation(Application.class);
             if (application != null) {
-                treeSet.add(currentClassName.getPackage().getName());
+                Set<String> scanBasePackagesTreeSet = new TreeSet<>();
+                scanBasePackagesTreeSet.add(currentClassName.getPackage().getName());
                 if (application.scanBasePackages().length != 0) {
-                    treeSet.addAll(Arrays.asList(application.scanBasePackages()));
+                    scanBasePackagesTreeSet.addAll(Arrays.asList(application.scanBasePackages()));
+                }
+                applicationResponse.setScanBasePackages(scanBasePackagesTreeSet);
+
+                if (application.excludes().length != 0) {
+                    applicationResponse.setExcludes(Arrays.asList(application.excludes()));
                 }
             }
         }
-        return treeSet;
+        return applicationResponse;
     }
 }
