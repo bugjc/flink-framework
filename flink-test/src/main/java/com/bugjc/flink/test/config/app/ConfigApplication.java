@@ -1,13 +1,14 @@
 package com.bugjc.flink.test.config.app;
 
+import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.annotation.Application;
+import com.bugjc.flink.test.config.app.config.TestComponentConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.ExecutionMode;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.api.java.operators.DataSource;
 
 /**
  * 程序入口
@@ -35,9 +36,18 @@ public class ConfigApplication {
         env.getConfig().setExecutionMode(ExecutionMode.PIPELINED);
 
         //2.使用配置值作为数据源
-        DataSource<String> dataSource = env.fromCollection(env.getConfig().getGlobalJobParameters().toMap().values());
+        //DataSource<String> dataSource = env.fromCollection(env.getConfig().getGlobalJobParameters().toMap().values());
 
-        //3.打印
-        dataSource.print();
+        //3.打印所有参数
+        //dataSource.print();
+
+
+        //4.测试组件参数自动配置
+        TestComponentConfig testComponentConfig = environmentConfig.getComponent(TestComponentConfig.class);
+        log.info("String:{}", testComponentConfig.getString());
+        log.info("Array:{}", JSON.toJSONString(testComponentConfig.getArray()));
+        log.info("List:{}", JSON.toJSONString(testComponentConfig.getList()));
+        log.info("Map:{}", JSON.toJSONString(testComponentConfig.getMap()));
+
     }
 }

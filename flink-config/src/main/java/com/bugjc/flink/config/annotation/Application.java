@@ -19,4 +19,10 @@ public @interface Application {
      * @return
      */
     String[] scanBasePackages() default {};
+
+    /**
+     * 排除特定的自动配置类
+     * @return
+     */
+    Class<?>[] excludes() default {};
 }
