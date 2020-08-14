@@ -1,8 +1,8 @@
 package com.bugjc.flink.test.config.app;
 
-import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.annotation.Application;
+import com.bugjc.flink.config.util.ClassUtil;
 import com.bugjc.flink.test.config.app.config.TestComponentConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
@@ -44,10 +44,7 @@ public class ConfigApplication {
 
         //4.测试组件参数自动配置
         TestComponentConfig testComponentConfig = environmentConfig.getComponent(TestComponentConfig.class);
-        log.info("String:{}", testComponentConfig.getString());
-        log.info("Array:{}", JSON.toJSONString(testComponentConfig.getArray()));
-        log.info("List:{}", JSON.toJSONString(testComponentConfig.getList()));
-        log.info("Map:{}", JSON.toJSONString(testComponentConfig.getMap()));
+        ClassUtil.print(testComponentConfig);
 
     }
 }

@@ -5,6 +5,8 @@ import com.bugjc.flink.config.model.component.NewFieldInput;
 import com.bugjc.flink.config.model.component.NewFieldOutput;
 import com.bugjc.flink.config.model.tree.Trie;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
  * @author aoki
  * @date 2020/8/12
  **/
+@Slf4j
 public class ParsingAttributesUtil {
 
 
@@ -42,15 +45,64 @@ public class ParsingAttributesUtil {
                 continue;
             }
 
+            //基本数据类型
+            if (isTargetClassType(field, Byte.class)) {
+                Byte data = trieNode.getChildren().size() > 0 ? new Byte(trieNode.getChildren().get(0).getData()) : null;
+                output.putValue(object, fieldName, data);
+            }
+
+            if (isTargetClassType(field, Short.class)) {
+                Short data = trieNode.getChildren().size() > 0 ? new Short(trieNode.getChildren().get(0).getData()) : null;
+                output.putValue(object, fieldName, data);
+            }
+
+            if (isTargetClassType(field, Integer.class)) {
+                Integer data = trieNode.getChildren().size() > 0 ? new Integer(trieNode.getChildren().get(0).getData()) : null;
+                output.putValue(object, fieldName, data);
+            }
+
+            if (isTargetClassType(field, Long.class)) {
+                Long data = trieNode.getChildren().size() > 0 ? new Long(trieNode.getChildren().get(0).getData()) : null;
+                output.putValue(object, fieldName, data);
+            }
+
+            if (isTargetClassType(field, Float.class)) {
+                Float data = trieNode.getChildren().size() > 0 ? new Float(trieNode.getChildren().get(0).getData()) : null;
+                output.putValue(object, fieldName, data);
+            }
+
+            if (isTargetClassType(field, Double.class)) {
+                Double data = trieNode.getChildren().size() > 0 ? new Double(trieNode.getChildren().get(0).getData()) : null;
+                output.putValue(object, fieldName, data);
+            }
+
+            if (isTargetClassType(field, Character.class)) {
+                //默认，区第一个字符
+                Character data = trieNode.getChildren().size() > 0 ? trieNode.getChildren().get(0).getData().charAt(0) : null;
+                output.putValue(object, fieldName, data);
+            }
+
+            if (isTargetClassType(field, Boolean.class)) {
+                Boolean data = trieNode.getChildren().size() > 0 ? Boolean.valueOf(trieNode.getChildren().get(0).getData()) : null;
+                output.putValue(object, fieldName, data);
+            }
+
             if (isTargetClassType(field, String.class)) {
                 String data = trieNode.getChildren().stream().map(TrieNode::getData).collect(Collectors.joining(","));
                 output.putValue(object, fieldName, data);
+            }
 
-            } else if (isTargetClassType(field, String[].class)) {
+            if (isTargetClassType(field, Character[].class)) {
+                Character[] data = trieNode.getChildren().size() > 0 ? ArrayUtils.toObject(trieNode.getChildren().get(0).getData().toCharArray()) : null;
+                output.putValue(object, fieldName, data);
+            }
+
+            if (isTargetClassType(field, String[].class)) {
                 String[] data = trieNode.getChildren().stream().map(TrieNode::getData).toArray(String[]::new);
                 output.putValue(object, fieldName, data);
+            }
 
-            } else if (isTargetClassType(field, List.class)) {
+            if (isTargetClassType(field, List.class)) {
                 // 当前集合的泛型类型
                 Type genericType = field.getGenericType();
                 ParameterizedType parameterizedType = (ParameterizedType) genericType;
@@ -61,8 +113,9 @@ public class ParsingAttributesUtil {
                 output.putContainer(NewFieldInput.Type.ArrayList, fieldName);
                 NewFieldInput input1 = new NewFieldInput(fieldName, NewFieldInput.Type.ArrayList, fieldPrefix, newFields);
                 deconstruction(input1, output);
+            }
 
-            } else if (isTargetClassType(field, Map.class)) {
+            if (isTargetClassType(field, Map.class)) {
                 // 当前 Map 的泛型类型
                 Type genericType = field.getGenericType();
                 ParameterizedType parameterizedType = (ParameterizedType) genericType;
@@ -79,6 +132,12 @@ public class ParsingAttributesUtil {
                 NewFieldInput input1 = new NewFieldInput(fieldName, NewFieldInput.Type.HashMap, fieldPrefix, newFields);
                 deconstruction(input1, output);
             }
+
+//            if (isTargetClassType(field, Enum.class)) {
+//                String enumReference = trieNode.getChildren().get(0).getData();
+//                Object data = EnumUtil.getEnum(enumReference);
+//                output.putValue(object, fieldName, data);
+//            }
         }
 
     }

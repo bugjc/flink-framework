@@ -17,8 +17,25 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "test.component.")
 public class TestComponentConfig implements Serializable {
 
-    private String string;
+    /**
+     * 基本数据类型
+     */
+    private Byte aByte;
+    private Short bShort;
+    private Integer cInt;
+    private Long dLong;
+    private Float eFloat;
+    private Double fDouble;
+    private Character gChar;
+    private Boolean hBoolean;
+    private String iString;
+
+    /**
+     * 数组
+     */
+    private Character[] character;
     private String[] array;
+
     private List<Entity> list;
     private Map<String, Object> map;
 
