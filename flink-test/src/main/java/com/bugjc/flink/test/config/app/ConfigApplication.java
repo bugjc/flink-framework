@@ -1,8 +1,12 @@
 package com.bugjc.flink.test.config.app;
 
+import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.annotation.Application;
 import com.bugjc.flink.config.util.ClassUtil;
+import com.bugjc.flink.connector.jdbc.DataSourceConfig;
+import com.bugjc.flink.connector.kafka.KafkaConsumerConfig;
+import com.bugjc.flink.connector.kafka.KafkaProducerConfig;
 import com.bugjc.flink.test.config.app.config.TestComponentConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
@@ -17,7 +21,7 @@ import org.apache.flink.api.java.ExecutionEnvironment;
  * @date 2020/7/15
  **/
 @Slf4j
-@Application
+@Application(excludes = {KafkaProducerConfig.class, KafkaConsumerConfig.class, DataSourceConfig.class})
 public class ConfigApplication {
 
     public static void main(String[] args) throws Exception {
@@ -44,6 +48,7 @@ public class ConfigApplication {
 
         //4.测试组件参数自动配置
         TestComponentConfig testComponentConfig = environmentConfig.getComponent(TestComponentConfig.class);
+        log.info("Result = {}", JSON.toJSONString(testComponentConfig));
         ClassUtil.print(testComponentConfig);
 
     }

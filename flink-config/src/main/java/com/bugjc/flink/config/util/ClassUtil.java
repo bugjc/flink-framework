@@ -40,7 +40,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Byte val = (Byte) m.invoke(object);
-                System.out.println("Byte type:" + val);
+                log.info("Byte {} = {}", field.getName(), val);
             }
 
             // 如果类型是 Short
@@ -48,7 +48,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Short val = (Short) m.invoke(object);
-                System.out.println("Short type:" + val);
+                log.info("Short {} = {}", field.getName(), val);
             }
 
             // 如果类型是 Integer
@@ -56,7 +56,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Integer val = (Integer) m.invoke(object);
-                System.out.println("Integer type:" + val);
+                log.info("Integer {} = {}", field.getName(), val);
             }
 
             // 如果类型是 Long
@@ -64,7 +64,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Long val = (Long) m.invoke(object);
-                System.out.println("Long type:" + val);
+                log.info("Long {} = {}", field.getName(), val);
             }
 
             // 如果类型是 Float
@@ -72,7 +72,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Float val = (Float) m.invoke(object);
-                System.out.println("Float type:" + val);
+                log.info("Float {} = {}", field.getName(), val);
             }
 
             // 如果类型是 Double
@@ -80,7 +80,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Double val = (Double) m.invoke(object);
-                System.out.println("Double type:" + val);
+                log.info("Double {} = {}", field.getName(), val);
             }
 
             // 如果类型是 Double
@@ -88,7 +88,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Character val = (Character) m.invoke(object);
-                System.out.println("Character type:" + val);
+                log.info("Character {} = {}", field.getName(), val);
             }
 
             // 如果类型是Boolean 是封装类
@@ -96,7 +96,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Boolean val = (Boolean) m.invoke(object);
-                System.out.println("Boolean type:" + val);
+                log.info("Boolean {} = {}", field.getName(), val);
             }
 
             // 如果类型是Date
@@ -104,7 +104,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Date val = (Date) m.invoke(object);
-                System.out.println("Date type:" + val);
+                log.info("Date {} = {}", field.getName(), val);
             }
 
             // 如果类型是 String
@@ -112,7 +112,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 String val = (String) m.invoke(object);
-                System.out.println("String type:" + val);
+                log.info("String {} = {}", field.getName(), val);
             }
 
             // 如果类型是 Character[]
@@ -120,7 +120,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Character[] val = (Character[]) m.invoke(object);
-                System.out.println("Character[] type:" + JSON.toJSONString(val));
+                log.info("Character[] {} = {}", field.getName(), JSON.toJSONString(val));
             }
 
             // 如果类型是 String[]
@@ -128,7 +128,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 String[] val = (String[]) m.invoke(object);
-                System.out.println("String[] type:" + JSON.toJSONString(val));
+                log.info("String[] {} = {}", field.getName(), JSON.toJSONString(val));
             }
 
             // 如果类型是 List
@@ -136,7 +136,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 List val = (List) m.invoke(object);
-                System.out.println("List type:" + JSON.toJSONString(val));
+                log.info("List {} = {}", field.getName(), JSON.toJSONString(val));
             }
 
             // 如果类型是 Map
@@ -144,7 +144,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Map val = (Map) m.invoke(object);
-                System.out.println("Map type:" + JSON.toJSONString(val));
+                log.info("Map {} = {}", field.getName(), JSON.toJSONString(val));
             }
 
             // 如果类型是 Enum
@@ -152,7 +152,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Enum val = (Enum) m.invoke(object);
-                System.out.println("Enum type:" + JSON.toJSONString(val));
+                log.info("Enum {} = {}", field.getName(), JSON.toJSONString(val));
             }
 
         }

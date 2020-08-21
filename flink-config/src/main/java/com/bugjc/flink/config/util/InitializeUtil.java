@@ -58,7 +58,7 @@ public class InitializeUtil {
         }
 
         //系统参数
-        parameterTool = ParameterTool.fromSystemProperties().mergeWith(parameterTool);
+        //parameterTool = ParameterTool.fromSystemProperties().mergeWith(parameterTool);
         return parameterTool;
     }
 
@@ -124,30 +124,16 @@ public class InitializeUtil {
      */
     public static Map<String, String> parseConfig(ParameterTool parameterTool, Set<Class<?>> setClasses) {
 
-        // map to list,and sorted
-        List<Map.Entry<String, String>> propertyList = new ArrayList<>(parameterTool.toMap().entrySet());
-        propertyList.sort(Map.Entry.comparingByKey());
 
-        //构建前缀树
+        //统一 key 的风格
+        Map<String, String> newParameter = new HashMap<>();
         for (Map.Entry<String, String> entry : parameterTool.toMap().entrySet()) {
-            Trie.insert(entry.getKey(), entry.getValue());
+            String key = PointToCamelUtil.camel2Point(entry.getKey());
+            newParameter.put(key, entry.getValue());
+            //构建前缀树
+            Trie.insert(key);
         }
 
-        //打印前缀树
-        Trie.print();
-
-        //移除无用的属性
-        Iterator<Map.Entry<String, String>> iterator = propertyList.iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> map = iterator.next();
-            String key = map.getKey();
-            for (Class<?> setClass : setClasses) {
-                ConfigurationProperties configurationProperties = setClass.getAnnotation(ConfigurationProperties.class);
-                if (configurationProperties != null && key.startsWith(configurationProperties.prefix())) {
-                    iterator.remove();
-                }
-            }
-        }
 
         //解析属性集合中按规则定义的各个组件配置属性值
         Map<String, String> componentConfigProperties = new HashMap<>();
@@ -157,7 +143,7 @@ public class InitializeUtil {
 
                 NewFieldOutput output = new NewFieldOutput();
                 List<NewField> fields = Arrays.stream(setClass.getDeclaredFields()).map(field -> new NewField(field.getName(), field.getType(), field.getGenericType())).collect(Collectors.toList());
-                NewFieldInput input = new NewFieldInput("None", NewFieldInput.Type.None,configurationProperties.prefix(),fields);
+                NewFieldInput input = new NewFieldInput("None", NewFieldInput.Type.None, configurationProperties.prefix(), fields, newParameter);
                 ParsingAttributesUtil.deconstruction(input, output);
 
                 componentConfigProperties.put(setClass.getName(), JSON.toJSONString(output.getData()));
@@ -168,7 +154,7 @@ public class InitializeUtil {
 
         //最后，合并属性集合和组件属性集合
         Map<String, String> combineResultMap = new HashMap<String, String>();
-        combineResultMap.putAll(propertyList.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        combineResultMap.putAll(newParameter);
         combineResultMap.putAll(componentConfigProperties);
         return combineResultMap;
     }
@@ -193,17 +179,6 @@ public class InitializeUtil {
             //ignore
         }
         return fieldName;
-    }
-
-    /**
-     * 对于组件配置的键，默认去除前缀后的值作为键。如用户定义了 @JSONField 注解则使用其 name 字段作为属性的键。
-     *
-     * @return
-     */
-    private static void buildObjectData(NewFieldOutput newFieldOutput, Class<?> setClass, String prefix) {
-        List<NewField> fields = Arrays.stream(setClass.getDeclaredFields()).map(field -> new NewField(field.getName(), field.getType(), field.getGenericType())).collect(Collectors.toList());
-        NewFieldInput newFieldInput = new NewFieldInput("none", NewFieldInput.Type.None,prefix,fields);
-        ParsingAttributesUtil.deconstruction(newFieldInput, newFieldOutput);
     }
 
     /**

@@ -29,14 +29,21 @@ public class TestComponentConfig implements Serializable {
     private Character gChar;
     private Boolean hBoolean;
     private String iString;
+    private String iStringChild;
 
     /**
      * 数组
      */
-    private Character[] character;
     private String[] array;
 
+    /**
+     * list
+     */
     private List<Entity> list;
-    private Map<String, Object> map;
+
+    /**
+     * map
+     */
+    private Map<String, String> map;
 
 }
