@@ -11,44 +11,32 @@ import java.util.List;
  * @date 2020/8/10
  **/
 public class Trie {
+    /**
+     * 前缀树
+     */
     private static TrieNode root = new TrieNode("/", true);
 
+
     public static void main(String[] args) {
-        Trie.insert("com.bugjc.flink.jdbc=123");
-        Trie.insert("com.bugjc.flink.jdbc.job=123,456,789");
-        Trie.insert("com.bugjc.flink.kafka.consumer.url=http://127.0.0.1:8080");
+        Trie.insert("com.bugjc.flink.jdbc");
+        Trie.insert("com.bugjc.flink.jdbcJob");
+        Trie.insert("com.bugjc.flink.kafka.consumer.url");
         Trie.print("", root.getChildren());
 
         TrieNode trieNode = Trie.find("com.bugjc.flink");
         Trie.print("", trieNode.getChildren());
     }
 
-    /**
-     * 解析赋值表达式并构建一个 Trie 树
-     *
-     * @param assignmentExpression --赋值表达式
-     */
-    public static void insert(String assignmentExpression) {
-
-        int index = assignmentExpression.indexOf("=");
-        String key = assignmentExpression.substring(0, index).trim();
-        String value = assignmentExpression.substring(index + 1).trim();
-
-        //构建
-        String[] keyArr = key.split("\\.");
-        childrenInsert(0, keyArr, value, root.getChildren());
-    }
 
     /**
      * 构建一个 Trie 树
      *
      * @param key
-     * @param value
      */
-    public static void insert(String key, String value) {
+    public static void insert(String key) {
         //构建
         String[] keyArr = PointToCamelUtil.camel2Point(key).split("\\.");
-        childrenInsert(0, keyArr, value, root.getChildren());
+        childrenInsert(0, keyArr, root.getChildren());
     }
 
     /**
@@ -56,15 +44,10 @@ public class Trie {
      *
      * @param index    --前缀节点索引
      * @param keyArr   --前缀节点数组集合
-     * @param value    --节点值
      * @param children --子节点列表
      */
-    private static void childrenInsert(int index, String[] keyArr, String value, List<TrieNode> children) {
+    private static void childrenInsert(int index, String[] keyArr, List<TrieNode> children) {
         if (keyArr.length <= index) {
-            String[] valueArr = value.split(",");
-            for (String valueStr : valueArr) {
-                children.add(new TrieNode(valueStr, false));
-            }
             return;
         }
         String childData = keyArr[index];
@@ -74,7 +57,7 @@ public class Trie {
             children.add(childTrieNode);
         }
 
-        childrenInsert(++index, keyArr, value, childTrieNode.getChildren());
+        childrenInsert(++index, keyArr, childTrieNode.getChildren());
     }
 
     /**

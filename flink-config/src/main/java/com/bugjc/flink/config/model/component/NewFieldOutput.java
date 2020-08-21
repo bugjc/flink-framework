@@ -25,18 +25,18 @@ public class NewFieldOutput {
     /**
      * 按类型获取容器的指针
      *
-     * @param typeEnum --数据类型
+     * @param type --数据类型
      * @param key      --容器名
      * @return 返回容器的指针
      */
-    public Map<String, Object> getContainer(Enum<NewFieldInput.Type> typeEnum, String key) {
-        if (typeEnum == NewFieldInput.Type.ArrayList) {
+    public Map<String, Object> getContainer(NewFieldInput.Type type, String key) {
+        if (type == NewFieldInput.Type.ArrayList) {
             List<Object> list = (List<Object>) data.get(key);
             Map<String, Object> object = new HashMap<>();
             list.add(object);
             // ArrayList 返回一个新的对象引用
             return object;
-        } else if (typeEnum == NewFieldInput.Type.HashMap) {
+        } else if (type == NewFieldInput.Type.HashMap) {
             // HashMap 返回对象的引用
             return (Map<String, Object>) data.get(key);
         } else {

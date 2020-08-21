@@ -3,6 +3,7 @@ package com.bugjc.flink.config.model.component;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据分组
@@ -19,7 +20,7 @@ public class NewFieldInput {
     /**
      * 分组数据存储的容器
      */
-    private Enum<Type> typeEnum;
+    private Type type;
 
     /**
      * 组件属性前缀
@@ -27,13 +28,23 @@ public class NewFieldInput {
     private String prefix;
 
     /**
+     * 当前处理的字段
+     */
+    private NewField currentNewField;
+
+    /**
      * 字段列表
      */
     private List<NewField> fields;
 
-    public NewFieldInput(String name, Type typeEnum, String prefix, List<NewField> fields) {
+    /**
+     * key value
+     */
+    private Map<String, String> parameterTool;
+
+    public NewFieldInput(String name, Type type, String prefix, List<NewField> fields,Map<String, String> parameterTool) {
         this.name = name;
-        this.typeEnum = typeEnum;
+        this.type = type;
         if (!prefix.endsWith(".")) {
             this.prefix = prefix + ".";
         } else {
@@ -41,6 +52,7 @@ public class NewFieldInput {
         }
 
         this.fields = fields;
+        this.parameterTool = parameterTool;
     }
 
 
