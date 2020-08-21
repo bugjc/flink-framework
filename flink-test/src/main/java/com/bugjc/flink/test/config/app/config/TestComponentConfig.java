@@ -5,7 +5,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 测试组件自动注入属性值
@@ -20,30 +19,39 @@ public class TestComponentConfig implements Serializable {
     /**
      * 基本数据类型
      */
-    private Byte aByte;
-    private Short bShort;
-    private Integer cInt;
-    private Long dLong;
-    private Float eFloat;
-    private Double fDouble;
-    private Character gChar;
-    private Boolean hBoolean;
-    private String iString;
-    private String iStringChild;
+//    private Byte aByte;
+//    private Short bShort;
+//    private Integer cInt;
+//    private Long dLong;
+//    private Float eFloat;
+//    private Double fDouble;
+//    private Character gChar;
+//    private Boolean hBoolean;
+//    private String iString;
+//    private String iStringChild;
+//
+//    /**
+//     * 数组
+//     */
+//    private String[] array;
+//
+//    /**
+//     * map
+//     */
+//    private Map<String, String> map;
+//
+    /**
+     * List<Entity>
+     */
+    private List<Entity> entities;
 
     /**
-     * 数组
+     * List<String>
      */
-    private String[] array;
+    private List<String> stringList;
 
     /**
-     * list
+     * List<Integer>
      */
-    private List<Entity> list;
-
-    /**
-     * map
-     */
-    private Map<String, String> map;
-
+    private List<Integer> integerList;
 }

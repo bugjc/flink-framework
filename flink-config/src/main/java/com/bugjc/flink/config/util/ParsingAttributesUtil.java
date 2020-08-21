@@ -56,15 +56,18 @@ public class ParsingAttributesUtil {
                 ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
                 if (isTargetClassType(field, List.class)) {
                     output.putContainer(NewFieldInput.Type.ArrayList, fieldName);
+
+                    Class<?> entityType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+                    List<NewField> newFields = Arrays.stream(entityType.getDeclaredFields())
+                            .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
+                            .collect(Collectors.toList());
+                    System.out.println(entityType);
+
+
                     List<TrieNode> children = trieNode.getChildren();
                     for (TrieNode child : children) {
                         //重写 list 前缀用以匹配字段
                         String newFieldPrefix = fieldPrefix + "." + child.getData();
-                        Class<?> entityType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
-                        List<NewField> newFields = Arrays.stream(entityType.getDeclaredFields())
-                                .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
-                                .collect(Collectors.toList());
-
                         NewFieldInput newInput = new NewFieldInput(fieldName, NewFieldInput.Type.ArrayList, newFieldPrefix, newFields, input.getParameterTool());
                         deconstruction(newInput, output);
                     }
@@ -104,7 +107,7 @@ public class ParsingAttributesUtil {
     /**
      * 基础数据类型处理
      */
-    private static void basicDataTypeProcessing(NewFieldInput input, NewFieldOutput output){
+    private static void basicDataTypeProcessing(NewFieldInput input, NewFieldOutput output) {
 
         NewField field = input.getCurrentNewField();
         String fieldName = field.getName();
@@ -166,6 +169,11 @@ public class ParsingAttributesUtil {
 
         if (isTargetClassType(field, String[].class)) {
             output.putValue(object, fieldName, value.split(","));
+        }
+
+        if (isTargetClassType(field, List.class)) {
+            //仅处理泛型是基本类型的 list
+            output.putValue(object, fieldName, Arrays.stream(value.split(",")).collect(Collectors.toList()));
         }
     }
 
