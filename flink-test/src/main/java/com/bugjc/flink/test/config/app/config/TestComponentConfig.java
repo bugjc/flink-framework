@@ -29,17 +29,22 @@ public class TestComponentConfig implements Serializable {
 //    private Boolean hBoolean;
 //    private String iString;
 //    private String iStringChild;
-//
+
 //    /**
 //     * 数组
 //     */
 //    private String[] array;
 //
 //    /**
-//     * map
+//     * map 基本对象
 //     */
 //    private Map<String, String> map;
 //
+//    /**
+//     * map 实体对象
+//     */
+//    private Map<String, Entity> map1;
+
     /**
      * List<Entity>
      */

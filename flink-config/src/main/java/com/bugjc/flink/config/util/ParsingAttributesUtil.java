@@ -33,6 +33,9 @@ public class ParsingAttributesUtil {
      */
     public static void deconstruction(NewFieldInput input, NewFieldOutput output) {
 
+        // list 容器每次调用会先创建一个容器并返回引用，这里固先保存引用，在其后的循环获取 list 属性的时候使用 output.getCurrentObject() 获取同一个对象的引用。
+        output.setCurrentObject(output.getContainer(input.getType(), input.getName()));
+
         for (NewField field : input.getFields()) {
             String fieldName = field.getName();
             String camelName = PointToCamelUtil.camel2Point(fieldName);
@@ -120,7 +123,7 @@ public class ParsingAttributesUtil {
             return;
         }
 
-        Map<String, Object> object = output.getContainer(input.getType(), input.getName());
+        Map<String, Object> object = output.getCurrentObject();
         //基本数据类型
         if (isTargetClassType(field, Byte.class)) {
             output.putValue(object, fieldName, new Byte(value));

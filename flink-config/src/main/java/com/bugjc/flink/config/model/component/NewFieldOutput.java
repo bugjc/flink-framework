@@ -21,6 +21,10 @@ public class NewFieldOutput {
      */
     private Map<String, Object> data = new HashMap<>();
 
+    /**
+     * 当前存储数据的对象引用
+     */
+    private Map<String, Object> currentObject;
 
     /**
      * 按类型获取容器的指针
