@@ -21,43 +21,77 @@ public class NewFieldOutput {
      */
     private Map<String, Object> data = new HashMap<>();
 
+    /**
+     * 当前存储数据的对象引用
+     */
+    private Map<String, Object> tempObject = new HashMap<>();
 
     /**
      * 按类型获取容器的指针
      *
-     * @param type --数据类型
-     * @param key      --容器名
+     * @param groupType   --容器数据类型
+     * @param groupName   --容器组名（取自类的属性名）     如：datasourceList
+     * @param groupPrefix --容器组前缀                    如：com.bugjc.map.key1
      * @return 返回容器的指针
      */
-    public Map<String, Object> getContainer(NewFieldInput.Type type, String key) {
-        if (type == NewFieldInput.Type.ArrayList) {
-            List<Object> list = (List<Object>) data.get(key);
-            Map<String, Object> object = new HashMap<>();
-            list.add(object);
-            // ArrayList 返回一个新的对象引用
-            return object;
-        } else if (type == NewFieldInput.Type.HashMap) {
+    public Object getContainer(NewFieldInput.Type groupType, String groupName, String groupPrefix) {
+        groupPrefix = groupPrefix.substring(0, groupPrefix.length() - 1);
+        if (groupType == NewFieldInput.Type.ArrayList) {
+            //返回一个对象引用
+            String dataObjectKey = groupName + groupPrefix;
+            return tempObject.get(dataObjectKey);
+        } else if (groupType == NewFieldInput.Type.HashMap) {
             // HashMap 返回对象的引用
-            return (Map<String, Object>) data.get(key);
+            return data.get(groupName);
+        } else if (groupType == NewFieldInput.Type.HashMap_Entity) {
+            Map<String, Object> map = (Map<String, Object>) data.get(groupName);
+            String key = groupPrefix.substring(groupPrefix.lastIndexOf(".") + 1);
+            //返回 HashMap key 的引用
+            return map.get(key);
         } else {
             //基础类型直接返回顶层容器
             return data;
         }
-
     }
 
 
     /**
      * 按类型添加一个容器
      *
-     * @param typeEnum --数据类型
-     * @param key      --容器名
+     * @param groupType   --容器数据类型
+     * @param groupName   --容器组名（取自类的属性名）     如：datasourceList
+     * @param groupPrefix --容器组前缀                    如：com.bugjc.map.key1
+     *                    备注：基本类型的数据直接共享顶层的{@link data}容器
      */
-    public void putContainer(Enum<NewFieldInput.Type> typeEnum, String key) {
-        if (typeEnum == NewFieldInput.Type.ArrayList) {
-            data.put(key, new ArrayList<>());
-        } else if (typeEnum == NewFieldInput.Type.HashMap) {
-            data.put(key, new HashMap<>());
+    public void putContainer(Enum<NewFieldInput.Type> groupType, String groupName, String groupPrefix) {
+        //格式前缀
+        groupPrefix = groupPrefix.substring(0, groupPrefix.length() - 1);
+        if (groupType == NewFieldInput.Type.ArrayList) {
+            List<Map<String, Object>> listContainer = (List<Map<String, Object>>) data.get(groupName);
+            if (listContainer == null) {
+                listContainer = new ArrayList<>();
+            }
+            String childContainer = groupName + groupPrefix;
+            Map<String, Object> object = (Map<String, Object>) tempObject.get(childContainer);
+            if (object == null) {
+                object = new HashMap<>();
+                listContainer.add(object);
+                data.put(groupName, listContainer);
+                tempObject.put(childContainer, object);
+            }
+
+        } else if (groupType == NewFieldInput.Type.HashMap) {
+            //创建组名的 HashMap 对象
+            data.put(groupName, new HashMap<>());
+        } else if (groupType == NewFieldInput.Type.HashMap_Entity) {
+            Map<String, Object> mapContainer = (Map<String, Object>) data.get(groupName);
+            if (mapContainer == null) {
+                mapContainer = new HashMap<>();
+            }
+            String key = groupPrefix.substring(groupPrefix.lastIndexOf(".") + 1);
+            mapContainer.put(key, new HashMap<>(8));
+            //顶层容器加入组名的 mapContainer
+            data.put(groupName, mapContainer);
         }
 
     }

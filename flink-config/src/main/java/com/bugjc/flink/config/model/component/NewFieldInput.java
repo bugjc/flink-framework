@@ -16,45 +16,34 @@ public class NewFieldInput {
     /**
      * 分组名
      */
-    private String name;
+    private String groupName;
     /**
-     * 分组数据存储的容器
+     * 分组数据存储的容器类型
      */
-    private Type type;
+    private Type groupType;
 
     /**
-     * 组件属性前缀
+     * 分组的属性前缀
      */
-    private String prefix;
+    private String groupPrefix;
 
     /**
-     * 当前处理的字段
-     */
-    private NewField currentNewField;
-
-    /**
-     * 字段列表
+     * 要处理的字段列表
      */
     private List<NewField> fields;
 
     /**
-     * key value
+     * 原始数据
      */
-    private Map<String, String> parameterTool;
+    private Map<String, String> originalData;
 
-    public NewFieldInput(String name, Type type, String prefix, List<NewField> fields,Map<String, String> parameterTool) {
-        this.name = name;
-        this.type = type;
-        if (!prefix.endsWith(".")) {
-            this.prefix = prefix + ".";
-        } else {
-            this.prefix = prefix;
-        }
-
+    public NewFieldInput(String groupName, Type groupType, String groupPrefix, List<NewField> fields, Map<String, String> parameterTool) {
+        this.groupName = groupName;
+        this.groupType = groupType;
+        this.groupPrefix = groupPrefix;
         this.fields = fields;
-        this.parameterTool = parameterTool;
+        this.originalData = parameterTool;
     }
-
 
     public enum Type {
         //None
@@ -65,7 +54,9 @@ public class NewFieldInput {
         Array,
         // ArrayList
         ArrayList,
-        // HashMap
-        HashMap
+        // HashMap          如：Map<String,String> 类型的变量
+        HashMap,
+        // HashMap_Entity   如：Map<String,Entity> 类型的变量
+        HashMap_Entity
     }
 }
