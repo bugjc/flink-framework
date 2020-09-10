@@ -1,16 +1,19 @@
 package com.bugjc.flink.config.util;
 
+import com.bugjc.flink.config.core.constant.Constants;
+import com.bugjc.flink.config.core.enums.ContainerType;
+import com.bugjc.flink.config.model.component.GroupContainer;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.component.NewFieldInput;
 import com.bugjc.flink.config.model.component.NewFieldOutput;
 import com.bugjc.flink.config.model.tree.Trie;
 import com.bugjc.flink.config.model.tree.TrieNode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,192 +34,178 @@ public class ParsingAttributesUtil {
      */
     public static void deconstruction(NewFieldInput input, NewFieldOutput output) {
 
-        // list 容器每次调用会先创建一个容器并返回引用，这里固先保存引用，在其后的循环获取 list 属性的时候使用 output.getCurrentObject() 获取同一个对象的引用。
-
+        ContainerType upperContainerType = input.getGroupContainer().getUpperContainerType();
+        String groupName = input.getGroupContainer().getCurrentGroupName();
         for (NewField field : input.getFields()) {
             String fieldName = field.getName();
             String camelName = PointToCamelUtil.camel2Point(fieldName);
-            String key = input.getGroupPrefix() + camelName;
-            //尝试获取值
-            String value = input.getOriginalData().get(key);
-            field.setKey(key);
-            field.setValue(value);
+            String currentGroupName = getGroupName(groupName, camelName);
 
-            //解构层级
-            if (!input.getOriginalData().containsKey(key)) {
-                // trie 则用来检测 map 和 list 容器
-                TrieNode trieNode = Trie.find(key);
-                if (trieNode == null) {
-                    //表示配置文件没有配置此属性
-                    continue;
-                }
+            ContainerType currentContainerType = ContainerType.getType(field);
+            GroupContainer currentGroupContainer = null;
+            if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.Basic) {
+                log.info("顶层容器下的基础字段");
+                currentGroupContainer = new GroupContainer()
+                        .setCurrentContainerType(ContainerType.getType(field))
+                        .setCurrentGroupName(currentGroupName)
+                        .setUpperContainerType(upperContainerType)
+                        .build();
 
-                //当前仅处理参数化类型的字段
-                boolean isParameterizedType = field.getGenericType() instanceof ParameterizedType;
-                if (!isParameterizedType) {
-                    continue;
-                }
+            } else if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.HashMap) {
+                log.info("顶层容器下的 Map<String,Basic> 容器字段");
+                currentGroupContainer = new GroupContainer()
+                        .setCurrentContainerType(currentContainerType)
+                        .setCurrentGroupName(currentGroupName)
+                        .setUpperContainerType(upperContainerType)
+                        .build();
 
-                ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
-                if (isTargetClassType(field, List.class)) {
-                    //仅支持 list bean 类型的解析
-                    Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
-                    if (!TypeUtil.isJavaBean(valueType)) {
-                        continue;
-                    }
+            } else if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.HashMap_Entity) {
+                log.info("顶层容器下的 Map<String,Entity> 容器字段");
+                currentGroupContainer = new GroupContainer()
+                        .setCurrentContainerType(currentContainerType)
+                        .setCurrentGroupName(currentGroupName)
+                        .setUpperContainerType(upperContainerType)
+                        .build();
 
-                    List<NewField> newFields = Arrays.stream(valueType.getDeclaredFields())
-                            .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
-                            .collect(Collectors.toList());
-                    List<TrieNode> children = trieNode.getChildren();
-                    for (TrieNode child : children) {
-                        //重写 list 前缀用以匹配字段
-                        String groupPrefix = getGroupPrefix(key,child.getData());
-                        output.putContainer(NewFieldInput.Type.ArrayList, fieldName, groupPrefix);
-                        NewFieldInput newInput = new NewFieldInput(fieldName, NewFieldInput.Type.ArrayList, groupPrefix, newFields, input.getOriginalData());
-                        deconstruction(newInput, output);
-                    }
-                }
-
-                if (isTargetClassType(field, Map.class)) {
-                    // 获取泛型第一个 class 对象
-                    Class<?> keyType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
-                    Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[1];
-
-                    List<NewField> newFields;
-                    if (TypeUtil.isJavaBean(valueType)) {
-                        newFields = Arrays.stream(valueType.getDeclaredFields())
-                                .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
-                                .collect(Collectors.toList());
-
-                        List<TrieNode> children = trieNode.getChildren();
-                        for (TrieNode child : children) {
-                            //重写 MAP 前缀用以匹配字段
-                            String groupPrefix = getGroupPrefix(key, child.getData());
-                            output.putContainer(NewFieldInput.Type.HashMap_Entity, fieldName, groupPrefix);
-                            NewFieldInput newInput = new NewFieldInput(fieldName, NewFieldInput.Type.HashMap_Entity, groupPrefix, newFields, input.getOriginalData());
-                            deconstruction(newInput, output);
-                        }
-                    } else {
-                        newFields = TypeUtil.getNewFields(valueType, trieNode);
-                        String groupPrefix = getGroupPrefix(key);
-                        output.putContainer(NewFieldInput.Type.HashMap, fieldName, groupPrefix);
-                        NewFieldInput newInput = new NewFieldInput(fieldName, NewFieldInput.Type.HashMap, groupPrefix, newFields, input.getOriginalData());
-                        deconstruction(newInput, output);
-                    }
-
-                }
+            } else if (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.Virtual) {
+                log.info("非顶层容器 Map 下的虚拟字段");
+                currentGroupContainer = new GroupContainer()
+                        .setCurrentContainerType(currentContainerType)
+                        .setCurrentGroupName(currentGroupName)
+                        .setUpperContainerType(upperContainerType)
+                        .buildLevel1();
+            } else if (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.Basic) {
+                log.info("非顶层容器 Map 下的基础字段");
+                currentGroupContainer = new GroupContainer()
+                        .setCurrentContainerType(currentContainerType)
+                        .setCurrentGroupName(currentGroupName)
+                        .setUpperContainerType(upperContainerType)
+                        .buildLevel1();
+            } else if (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.HashMap_Entity) {
+                currentGroupContainer = new GroupContainer()
+                        .setCurrentContainerType(currentContainerType)
+                        .setCurrentGroupName(currentGroupName)
+                        .setUpperContainerType(upperContainerType)
+                        .buildLevel1();
             } else {
-                //基础数据类型的值处理
-                Map<String, Object> object = (Map<String, Object>) output.getContainer(input.getGroupType(), input.getGroupName(), input.getGroupPrefix());
-                output.putValue(object, fieldName, TypeUtil.getTypeData(field));
+                throw new NullPointerException();
             }
 
+            //为当前字段创建并关联一个容器
+            assert currentGroupContainer != null;
+            output.putContainer(currentGroupContainer);
 
-//            if (isTargetClassType(field, Enum.class)) {
-//                String enumReference = trieNode.getChildren().get(0).getData();
-//                Object data = EnumUtil.getEnum(enumReference);
-//                output.putValue(object, fieldName, data);
+            //尝试获取值
+            String value = getValue(input.getOriginalData(), currentGroupContainer.getCurrentGroupName());
+            field.setKey(currentGroupContainer.getCurrentGroupName());
+            field.setValue(value);
+
+            //基础字段处理
+            if (currentGroupContainer.getCurrentContainerType() == ContainerType.Basic) {
+                //基础数据类型的值处理
+                Map<String, Object> object = output.getContainer(currentGroupContainer);
+                output.putValue(object, fieldName, TypeUtil.getTypeData(field));
+                continue;
+            }
+
+            // trie 则用来检测 map 和 list 容器
+            TrieNode trieNode = Trie.find(currentGroupContainer.getCurrentGroupName());
+            if (trieNode == null) {
+                //表示配置文件没有配置此属性
+                continue;
+            }
+
+            //当前仅处理参数化类型的字段
+            boolean isParameterizedType = field.getGenericType() instanceof ParameterizedType;
+            if (!isParameterizedType) {
+                continue;
+            }
+
+            ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+//            if (currentContainerType == ContainerType.ArrayList) {
+//                //仅支持 list bean 类型的解析
+//                Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+//                if (!TypeUtil.isJavaBean(valueType)) {
+//                    continue;
+//                }
+//
+//                List<NewField> newFields = Arrays.stream(valueType.getDeclaredFields())
+//                        .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
+//                        .collect(Collectors.toList());
+//                List<TrieNode> children = trieNode.getChildren();
+//                for (TrieNode child : children) {
+//                    //list 分组名需要往前多走一级
+//                    String nextGroupName = getGroupName(currentGroupContainer.getCurrentGroupName(), child.getData());
+//                    GroupContainer nextGroupContainer = new GroupContainer()
+//                            .setCurrentContainerType(ContainerType.ArrayList)
+//                            .setCurrentGroupName(nextGroupName)
+//                            .buildLevel2();
+//                    output.putContainer(nextGroupContainer);
+//                    NewFieldInput newInput = new NewFieldInput(nextGroupContainer, newFields, input.getOriginalData());
+//                    deconstruction(newInput, output);
+//                }
 //            }
+
+            if (currentContainerType == ContainerType.HashMap_Entity) {
+                //遍历 Map 的 key,然后为每个 key 递归构建 entity 对象
+                List<NewField> valueFields = new ArrayList<>();
+                List<TrieNode> children = trieNode.getChildren();
+                for (TrieNode child : children) {
+                    NewField newField = new NewField(child.getData(), field.getType(), field.getGenericType(), true);
+                    valueFields.add(newField);
+                }
+
+                //获取组名
+                GroupContainer nextGroupChildContainer = new GroupContainer()
+                        .setCurrentGroupName(currentGroupContainer.getCurrentGroupName())
+                        .setUpperContainerType(ContainerType.HashMap_Entity)
+                        .build();
+
+                //递归
+                NewFieldInput newInput = new NewFieldInput(nextGroupChildContainer, valueFields, input.getOriginalData());
+                deconstruction(newInput, output);
+            }
+
+            //当前字段是一个 MAP,递归处理
+            if (currentGroupContainer.getCurrentContainerType() == ContainerType.HashMap) {
+                Type[] types = parameterizedType.getActualTypeArguments();
+                Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[types.length - 1];
+
+
+                List<NewField> valueFields = new ArrayList<>();
+                List<TrieNode> children = trieNode.getChildren();
+                for (TrieNode child : children) {
+                    NewField newField = new NewField(child.getData(), valueType, valueType, true);
+                    valueFields.add(newField);
+                }
+
+                GroupContainer nextGroupContainer = new GroupContainer()
+                        .setCurrentContainerType(ContainerType.HashMap)
+                        .setCurrentGroupName(currentGroupContainer.getCurrentGroupName())
+                        .build();
+
+                NewFieldInput newInput = new NewFieldInput(nextGroupContainer, valueFields, input.getOriginalData());
+                deconstruction(newInput, output);
+            }
+
+            if (currentContainerType == ContainerType.Virtual) {
+                Type[] types = parameterizedType.getActualTypeArguments();
+                Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[types.length - 1];
+                //获取要处理的 entity 字段
+                List<NewField> valueFields = Arrays.stream(valueType.getDeclaredFields())
+                        .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
+                        .collect(Collectors.toList());
+
+                GroupContainer nextGroupChildContainer = new GroupContainer()
+                        .setCurrentGroupName(currentGroupContainer.getCurrentGroupName())
+                        .setUpperContainerType(upperContainerType)
+                        .build();
+
+                //递归
+                NewFieldInput newInput = new NewFieldInput(nextGroupChildContainer, valueFields, input.getOriginalData());
+                deconstruction(newInput, output);
+            }
         }
-
-    }
-
-    /**
-     * 基础数据类型处理
-     */
-    private static void basicDataTypeProcessing(NewFieldInput input, NewFieldOutput output) {
-
-//        NewField field = input.getCurrentNewField();
-//        String fieldName = field.getName();
-//        String camelName = PointToCamelUtil.camel2Point(fieldName);
-//        String key = input.getPrefix() + camelName;
-//
-//        //获取值
-//        String value = input.getParameterTool().get(key);
-//        if (StringUtils.isBlank(value)) {
-//            return;
-//        }
-//
-//        Map<String, Object> object = (Map<String, Object>) output.getContainer(input.getType(), input.getName(), input.getPrefix());
-//        output.putValue(object, fieldName, TypeUtil.getTypeData(field));
-
-        //基本数据类型
-//        if (isTargetClassType(field, Byte.class)) {
-//            output.putValue(object, fieldName, new Byte(value));
-//        }
-//
-//        if (isTargetClassType(field, Short.class)) {
-//            output.putValue(object, fieldName, new Short(value));
-//        }
-//
-//        if (isTargetClassType(field, Integer.class)) {
-//            output.putValue(object, fieldName, new Integer(value));
-//        }
-//
-//        if (isTargetClassType(field, Long.class)) {
-//            output.putValue(object, fieldName, new Long(value));
-//        }
-//
-//        if (isTargetClassType(field, Float.class)) {
-//            output.putValue(object, fieldName, new Float(value));
-//        }
-//
-//        if (isTargetClassType(field, Double.class)) {
-//            output.putValue(object, fieldName, new Double(value));
-//        }
-//
-//        if (isTargetClassType(field, Character.class)) {
-//            //默认，取第一个字符
-//            output.putValue(object, fieldName, value.charAt(0));
-//        }
-//
-//        if (isTargetClassType(field, Boolean.class)) {
-//            output.putValue(object, fieldName, Boolean.valueOf(value));
-//        }
-//
-//        if (isTargetClassType(field, String.class)) {
-//            output.putValue(object, fieldName, value);
-//        }
-//
-//        if (isTargetClassType(field, Object.class)) {
-//            output.putValue(object, fieldName, value);
-//        }
-//
-//        if (isTargetClassType(field, Character[].class)) {
-//            output.putValue(object, fieldName, value.toCharArray());
-//        }
-//
-//        if (isTargetClassType(field, String[].class)) {
-//            output.putValue(object, fieldName, value.split(","));
-//        }
-//
-//        if (isTargetClassType(field, List.class)) {
-//            //仅处理泛型是基本类型的 list
-//            output.putValue(object, fieldName, Arrays.stream(value.split(",")).collect(Collectors.toList()));
-//        }
-    }
-
-    /**
-     * 判断Field是否是指定的类
-     *
-     * @param field
-     * @param targetType
-     * @return
-     */
-    private static boolean isTargetClassType(NewField field, Class targetType) {
-        return field.getType() == targetType;
-    }
-
-    /**
-     * 判断Field是否是指定的类
-     *
-     * @param type
-     * @param targetType
-     * @return
-     */
-    private static boolean isTargetClassType(Class<?> type, Class targetType) {
-        return type == targetType;
     }
 
     /**
@@ -226,15 +215,62 @@ public class ParsingAttributesUtil {
      * @return
      */
     private static String getGroupPrefix(String... params) {
-        String suffix = ".";
+        return format(params);
+    }
+
+    private static String getGroupName(String... params) {
+        return format(params);
+    }
+
+    private static String format(String... params) {
         StringBuilder sb = new StringBuilder();
         for (String param : params) {
             sb.append(param);
-            if (!param.endsWith(suffix)) {
-                sb.append(suffix);
+            if (!param.endsWith(Constants.SUFFIX)) {
+                sb.append(Constants.SUFFIX);
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * 获取 Value
+     *
+     * @param originalData
+     * @param key
+     * @return
+     */
+    private static String getValue(Map<String, String> originalData, String key) {
+        String value = originalData.get(key);
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+
+        //获取变量集合，注意：不允许嵌套变量，如：${parent${child}} 是错误的写法，正确的应该是 ${parent}${child}
+        Map<String, String> variableMap = new TreeMap<>();
+        for (int i = 0; i < value.length(); i++) {
+            if (value.charAt(i) == '$' && value.charAt(++i) == '{') {
+                int begin = i - 1;
+                for (int j = ++i; j < value.length(); j++) {
+                    if (value.charAt(j) == '}') {
+                        int end = j + 1;
+                        i = j;
+                        String varKey = value.substring(begin, end);
+                        String valueKey = varKey.substring(2, varKey.length() - 1);
+                        String varValue = originalData.get(valueKey);
+                        variableMap.put(varKey, varValue);
+                        break;
+                    }
+                }
+            }
+        }
+
+        //替换变量的值
+        for (String varKey : variableMap.keySet()) {
+            value = value.replace(varKey, variableMap.get(varKey));
+        }
+
+        return value;
     }
 
 

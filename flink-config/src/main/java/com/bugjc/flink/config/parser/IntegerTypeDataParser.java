@@ -3,6 +3,7 @@ package com.bugjc.flink.config.parser;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +19,9 @@ public class IntegerTypeDataParser implements TypeDataParser {
 
     @Override
     public <T> T getTypeData(NewField newField) {
+        if (StringUtils.isBlank(newField.getValue())) {
+            return null;
+        }
         return (T) TypeUtils.castToInt(newField.getValue());
     }
 

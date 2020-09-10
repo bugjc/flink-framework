@@ -3,6 +3,7 @@ package com.bugjc.flink.config.parser;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -23,6 +24,9 @@ public class CollectionTypeDataParser implements TypeDataParser {
     public <T> T getTypeData(NewField newField) {
         Type type = newField.getType();
         String value = newField.getValue();
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
         Collection list = TypeUtils.createCollection(type);
         String[] arr = value.split(",");
         Collections.addAll(list, arr);

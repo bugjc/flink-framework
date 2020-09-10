@@ -6,7 +6,6 @@ import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.test.component.DataSourceConfig;
 import com.bugjc.flink.config.test.component.KafkaConsumerConfig;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
@@ -78,15 +77,15 @@ class EnvironmentConfigTest {
         log.info("DataSource 配置信息：{}", JSON.toJSONString(dataSourceConfig));
     }
 
-    @Test
-    void get() {
-        log.info("application name：{}", environmentConfig.getParameterTool().get("flink.application.name"));
-    }
-
-    @Test
-    void getParameterTool() {
-        ParameterTool parameterTool = environmentConfig.getParameterTool();
-        boolean flag = parameterTool.has("flink.application.name");
-        log.info("ParameterTool 配置文件 {} `flink.application.name` 属性", flag ? "存在" : "不存在");
-    }
+//    @Test
+//    void get() {
+//        log.info("application name：{}", environmentConfig.getParameterTool().get("flink.application.name"));
+//    }
+//
+//    @Test
+//    void getParameterTool() {
+//        ParameterTool parameterTool = environmentConfig.getParameterTool();
+//        boolean flag = parameterTool.has("flink.application.name");
+//        log.info("ParameterTool 配置文件 {} `flink.application.name` 属性", flag ? "存在" : "不存在");
+//    }
 }

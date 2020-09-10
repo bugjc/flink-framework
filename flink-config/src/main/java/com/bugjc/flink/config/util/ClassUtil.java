@@ -132,7 +132,7 @@ public class ClassUtil {
             }
 
             // 如果类型是 List
-            if (isTargetClassType(field, List.class)) {
+            if (TypeUtil.isList(field.getType())) {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 List val = (List) m.invoke(object);
@@ -140,7 +140,7 @@ public class ClassUtil {
             }
 
             // 如果类型是 Map
-            if (isTargetClassType(field, Map.class)) {
+            if (TypeUtil.isMap(field.getType())) {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Map val = (Map) m.invoke(object);
@@ -148,7 +148,7 @@ public class ClassUtil {
             }
 
             // 如果类型是 Enum
-            if (isTargetClassType(field, Enum.class)) {
+            if (TypeUtil.isEnum(field.getType())) {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Enum val = (Enum) m.invoke(object);

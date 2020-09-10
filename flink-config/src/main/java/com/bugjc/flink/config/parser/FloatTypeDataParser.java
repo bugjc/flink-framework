@@ -3,6 +3,7 @@ package com.bugjc.flink.config.parser;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,9 +20,10 @@ public class FloatTypeDataParser implements TypeDataParser {
     @Override
     public <T> T getTypeData(NewField newField) {
         String value = newField.getValue();
-        return value == null
-                ? null
-                : (T) TypeUtils.castToFloat(value);
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return (T) TypeUtils.castToFloat(value);
     }
 
     @Override

@@ -13,19 +13,11 @@ import java.util.Map;
  **/
 @Data
 public class NewFieldInput {
-    /**
-     * 分组名
-     */
-    private String groupName;
-    /**
-     * 分组数据存储的容器类型
-     */
-    private Type groupType;
 
     /**
-     * 分组的属性前缀
+     * 分组容器
      */
-    private String groupPrefix;
+    private GroupContainer groupContainer;
 
     /**
      * 要处理的字段列表
@@ -37,26 +29,11 @@ public class NewFieldInput {
      */
     private Map<String, String> originalData;
 
-    public NewFieldInput(String groupName, Type groupType, String groupPrefix, List<NewField> fields, Map<String, String> parameterTool) {
-        this.groupName = groupName;
-        this.groupType = groupType;
-        this.groupPrefix = groupPrefix;
+    public NewFieldInput(GroupContainer groupContainer, List<NewField> fields, Map<String, String> parameterTool) {
+        this.groupContainer = groupContainer;
         this.fields = fields;
         this.originalData = parameterTool;
     }
 
-    public enum Type {
-        //None
-        None,
-        //String
-        String,
-        //Array
-        Array,
-        // ArrayList
-        ArrayList,
-        // HashMap          如：Map<String,String> 类型的变量
-        HashMap,
-        // HashMap_Entity   如：Map<String,Entity> 类型的变量
-        HashMap_Entity
-    }
+
 }

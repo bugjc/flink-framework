@@ -4,7 +4,6 @@ import com.bugjc.flink.config.annotation.ConfigurationProperties;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,21 +19,21 @@ public class TestComponentConfig implements Serializable {
     /**
      * 基本数据类型
      */
-    private Byte aByte;
-    private Short bShort;
-    private Integer cInt;
-    private Long dLong;
-    private Float eFloat;
-    private Double fDouble;
-    private Character gChar;
-    private Boolean hBoolean;
-    private String iString;
-    private String iStringChild;
-
-    /**
-     * 数组
-     */
-    private String[] array;
+//    private Byte aByte;
+//    private Short bShort;
+//    private Integer cInt;
+//    private Long dLong;
+//    private Float eFloat;
+//    private Double fDouble;
+//    private Character gChar;
+//    private Boolean hBoolean;
+//    private String iString;
+//    private String iStringChild;
+//
+//    /**
+//     * 数组
+//     */
+//    private String[] array;
 
     /**
      * map 基本对象
@@ -45,20 +44,26 @@ public class TestComponentConfig implements Serializable {
      * map 实体对象
      * 结果示例：{"key1":{"field1":"1","field2":["1.1","1.2"]},"key2":{"field1":"2","field2":["2.1","2.2"]}}
      */
-    private Map<String, Entity> map1;
+//    private Map<String, Entity> map1;
 
-    /**
-     * List<Entity>
-     */
-    private List<Entity> entities;
+//    /**
+//     * List<Entity>
+//     */
+//    private List<Entity> entities;
 
-    /**
-     * List<String>
-     */
-    private List<String> stringList;
-
-    /**
-     * List<Integer>
-     */
-    private List<Integer> integerList;
+//    /**
+//     * List<String>
+//     */
+//    private List<String> stringList;
+//
+//    /**
+//     * List<Integer>
+//     */
+//    private List<Integer> integerList;
+//
+//    /**
+//     * Enum
+//     * 结果示例：{"publishType":"Private"}
+//     */
+//    private PublishType publishType;
 }

@@ -39,14 +39,21 @@ public class NewField {
      */
     private String value;
 
-//    /**
-//     * trie 树，用来辅助生成要解析的 List<NewField>
-//     */
-//    private TrieNode trieNodes;
+    /**
+     * 是否虚拟字段
+     */
+    private boolean virtualField = false;
 
     public NewField(String name, Class<?> type, Type genericType) {
         this.name = name;
         this.type = type;
         this.genericType = genericType;
+    }
+
+    public NewField(String name, Class<?> type, Type genericType, boolean virtualField) {
+        this.name = name;
+        this.type = type;
+        this.genericType = genericType;
+        this.virtualField = virtualField;
     }
 }

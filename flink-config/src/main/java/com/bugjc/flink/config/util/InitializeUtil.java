@@ -1,17 +1,19 @@
 package com.bugjc.flink.config.util;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.bugjc.flink.config.Config;
 import com.bugjc.flink.config.annotation.Application;
 import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
+import com.bugjc.flink.config.core.enums.ContainerType;
 import com.bugjc.flink.config.exception.ApplicationContextException;
 import com.bugjc.flink.config.model.application.ApplicationResponse;
+import com.bugjc.flink.config.model.component.GroupContainer;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.component.NewFieldInput;
 import com.bugjc.flink.config.model.component.NewFieldOutput;
 import com.bugjc.flink.config.model.tree.Trie;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -140,14 +142,19 @@ public class InitializeUtil {
         for (Class<?> setClass : setClasses) {
             ConfigurationProperties configurationProperties = setClass.getAnnotation(ConfigurationProperties.class);
             if (configurationProperties != null) {
-
-                NewFieldOutput output = new NewFieldOutput();
+                String prefix = configurationProperties.prefix();
                 List<NewField> fields = Arrays.stream(setClass.getDeclaredFields()).map(field -> new NewField(field.getName(), field.getType(), field.getGenericType())).collect(Collectors.toList());
-                NewFieldInput input = new NewFieldInput("None", NewFieldInput.Type.None, configurationProperties.prefix(), fields, newParameter);
+                GroupContainer initGroupContainer = new GroupContainer()
+                        .setCurrentContainerType(ContainerType.None)
+                        .setCurrentGroupName(prefix)
+                        .setUpperContainerType(ContainerType.None)
+                        .buildLevel1();
+                NewFieldInput input = new NewFieldInput(initGroupContainer, fields, newParameter);
+                NewFieldOutput output = new NewFieldOutput();
                 ParsingAttributesUtil.deconstruction(input, output);
-
-                componentConfigProperties.put(setClass.getName(), JSON.toJSONString(output.getData()));
-                log.info("Auto load component configuration：{}", JSON.toJSONString(output.getData()));
+                String data = new Gson().toJson(output.getData());
+                componentConfigProperties.put(setClass.getName(), data);
+                log.info("Auto load component configuration：{}", data);
             }
         }
 

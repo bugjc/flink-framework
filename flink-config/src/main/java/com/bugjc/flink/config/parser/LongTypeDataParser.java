@@ -3,6 +3,7 @@ package com.bugjc.flink.config.parser;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,10 +20,13 @@ public class LongTypeDataParser implements TypeDataParser {
 
     @Override
     public <T> T getTypeData(NewField newField) {
+        if (StringUtils.isBlank(newField.getValue())) {
+            return null;
+        }
         Long longObject = TypeUtils.castToLong(newField.getValue());
         return newField.getType() == AtomicLong.class
                 ? (T) new AtomicLong(longObject.longValue())
-                : (T) longObject;
+                :  (T) longObject;
     }
 
     @Override

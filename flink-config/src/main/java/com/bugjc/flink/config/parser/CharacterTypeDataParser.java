@@ -3,6 +3,7 @@ package com.bugjc.flink.config.parser;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,10 +20,11 @@ public class CharacterTypeDataParser implements TypeDataParser {
 
     @Override
     public <T> T getTypeData(NewField newField) {
-        Object value = newField.getValue();
-        return value == null
-                ? null
-                : (T) TypeUtils.castToChar(value);
+        String value = newField.getValue();
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return (T) TypeUtils.castToChar(value);
     }
 
     @Override

@@ -1,10 +1,11 @@
 package com.bugjc.flink.config.model.component;
 
+import com.bugjc.flink.config.core.enums.ContainerType;
+import com.bugjc.flink.config.model.tree.TrieValue;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,6 +15,7 @@ import java.util.Map;
  * @date 2020/8/12
  **/
 @Data
+@Slf4j
 public class NewFieldOutput {
 
     /**
@@ -24,77 +26,119 @@ public class NewFieldOutput {
     /**
      * 当前存储数据的对象引用
      */
-    private Map<String, Object> tempObject = new HashMap<>();
+    private Map<String, Map<String, Object>> tempObject = new HashMap<>();
 
     /**
      * 按类型获取容器的指针
      *
-     * @param groupType   --容器数据类型
-     * @param groupName   --容器组名（取自类的属性名）     如：datasourceList
-     * @param groupPrefix --容器组前缀                    如：com.bugjc.map.key1
      * @return 返回容器的指针
      */
-    public Object getContainer(NewFieldInput.Type groupType, String groupName, String groupPrefix) {
-        groupPrefix = groupPrefix.substring(0, groupPrefix.length() - 1);
-        if (groupType == NewFieldInput.Type.ArrayList) {
-            //返回一个对象引用
-            String dataObjectKey = groupName + groupPrefix;
-            return tempObject.get(dataObjectKey);
-        } else if (groupType == NewFieldInput.Type.HashMap) {
-            // HashMap 返回对象的引用
-            return data.get(groupName);
-        } else if (groupType == NewFieldInput.Type.HashMap_Entity) {
-            Map<String, Object> map = (Map<String, Object>) data.get(groupName);
-            String key = groupPrefix.substring(groupPrefix.lastIndexOf(".") + 1);
-            //返回 HashMap key 的引用
-            return map.get(key);
-        } else {
+    public Map<String, Object> getContainer(GroupContainer groupContainer) {
+        TrieValue.print();
+        ContainerType upperContainerType = groupContainer.getUpperContainerType();
+        ContainerType currentContainerType = groupContainer.getCurrentContainerType();
+        if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.Basic) {
+            log.info("顶层容器下的基础字段");
             //基础类型直接返回顶层容器
             return data;
+        } else if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.HashMap) {
+            log.info("顶层容器下的 Map<String,Basic> 容器字段");
+            //返回对象引用
+            return tempObject.get(groupContainer.getUpperGroupName());
+
+        } else if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.HashMap_Entity) {
+            log.info("顶层容器下的 Map<String,Entity> 容器字段");
+            //返回对象引用
+            return tempObject.get(groupContainer.getUpperGroupName());
+
+        } else if (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.Virtual) {
+            log.info("非顶层容器 Map 下的基础字段");
+            //返回对象引用
+            return tempObject.get(groupContainer.getUpperGroupName());
+        } else if (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.Basic) {
+            log.info("非顶层容器 Map 下的基础字段");
+            //返回对象引用
+            return tempObject.get(groupContainer.getUpperGroupName());
+        } else if (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.HashMap_Entity) {
+            log.info("非顶层容器 Map 下的基础字段");
+            //返回对象引用
+            return tempObject.get(groupContainer.getUpperGroupName());
+        } else {
+            return null;
         }
     }
 
 
     /**
-     * 按类型添加一个容器
+     * 添加存储数据的容器
      *
-     * @param groupType   --容器数据类型
-     * @param groupName   --容器组名（取自类的属性名）     如：datasourceList
-     * @param groupPrefix --容器组前缀                    如：com.bugjc.map.key1
-     *                    备注：基本类型的数据直接共享顶层的{@link data}容器
+     * @param groupContainer
      */
-    public void putContainer(Enum<NewFieldInput.Type> groupType, String groupName, String groupPrefix) {
-        //格式前缀
-        groupPrefix = groupPrefix.substring(0, groupPrefix.length() - 1);
-        if (groupType == NewFieldInput.Type.ArrayList) {
-            List<Map<String, Object>> listContainer = (List<Map<String, Object>>) data.get(groupName);
-            if (listContainer == null) {
-                listContainer = new ArrayList<>();
-            }
-            String childContainer = groupName + groupPrefix;
-            Map<String, Object> object = (Map<String, Object>) tempObject.get(childContainer);
-            if (object == null) {
-                object = new HashMap<>();
-                listContainer.add(object);
-                data.put(groupName, listContainer);
-                tempObject.put(childContainer, object);
+    public void putContainer(GroupContainer groupContainer) {
+        TrieValue.insert(groupContainer.getCurrentGroupName());
+
+        //创建并关联容器
+        Map<String, Object> upperContainer = tempObject.get(groupContainer.getUpperGroupName());
+        if (upperContainer == null) {
+            //关联顶层容器
+            if (data.containsKey(groupContainer.getCurrentContainerName())) {
+                return;
             }
 
-        } else if (groupType == NewFieldInput.Type.HashMap) {
-            //创建组名的 HashMap 对象
-            data.put(groupName, new HashMap<>());
-        } else if (groupType == NewFieldInput.Type.HashMap_Entity) {
-            Map<String, Object> mapContainer = (Map<String, Object>) data.get(groupName);
-            if (mapContainer == null) {
-                mapContainer = new HashMap<>();
-            }
-            String key = groupPrefix.substring(groupPrefix.lastIndexOf(".") + 1);
-            mapContainer.put(key, new HashMap<>(8));
-            //顶层容器加入组名的 mapContainer
-            data.put(groupName, mapContainer);
+            data.put(groupContainer.getCurrentContainerName(), create(groupContainer));
+            return;
         }
 
+        //关联一个新的容器
+        upperContainer.put(groupContainer.getCurrentContainerName(), create(groupContainer));
     }
+
+
+    /**
+     * 创建容器
+     *
+     * @param groupContainer
+     * @return
+     */
+    private Map<String, Object> create(GroupContainer groupContainer) {
+        ContainerType upperContainerType = groupContainer.getUpperContainerType();
+        ContainerType currentContainerType = groupContainer.getCurrentContainerType();
+        //获取当前组容器指定的对象，没有则创建对象并与容器建立从属关系
+        Map<String, Object> object = tempObject.get(groupContainer.getCurrentGroupName());
+        if (object == null) {
+            if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.Basic) {
+                log.info("顶层容器下的基础字段");
+
+            } else if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.HashMap) {
+                log.info("顶层容器下的 Map<String,Basic> 容器字段");
+                object = new HashMap<String, Object>();
+                tempObject.put(groupContainer.getCurrentGroupName(), object);
+
+            } else if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.HashMap_Entity) {
+                log.info("顶层容器下的 Map<String,Entity> 容器字段");
+                object = new HashMap<String, Object>();
+                tempObject.put(groupContainer.getCurrentGroupName(), object);
+
+            } else if (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.Virtual) {
+                log.info("非顶层容器 Map 下的基础字段");
+                object = new HashMap<String, Object>();
+                //Map<String,Entity> 的索引是上级组名
+                tempObject.put(groupContainer.getCurrentGroupName(), object);
+            } else if (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.Basic) {
+                log.info("非顶层容器 Map 下的基础字段");
+                object = new HashMap<String, Object>();
+                //Map<String,Entity> 的索引是上级组名
+                tempObject.put(groupContainer.getCurrentGroupName(), object);
+            } else if (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.HashMap_Entity) {
+                log.info("非顶层容器 Map 下的基础字段");
+                object = new HashMap<String, Object>();
+                //Map<String,Entity> 的索引是上级组名
+                tempObject.put(groupContainer.getCurrentGroupName(), object);
+            }
+        }
+        return object;
+    }
+
 
     /**
      * 按类型选择容器存储数据

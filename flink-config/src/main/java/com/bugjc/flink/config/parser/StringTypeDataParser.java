@@ -2,6 +2,7 @@ package com.bugjc.flink.config.parser;
 
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -21,17 +22,14 @@ public class StringTypeDataParser implements TypeDataParser {
     public <T> T getTypeData(NewField newField) {
         Type type = newField.getType();
         String value = newField.getValue();
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
         if (type == StringBuffer.class) {
-            if (value == null) {
-                return null;
-            }
             return (T) new StringBuffer(value);
         }
 
         if (type == StringBuilder.class) {
-            if (value == null) {
-                return null;
-            }
             return (T) new StringBuilder(value);
         }
 

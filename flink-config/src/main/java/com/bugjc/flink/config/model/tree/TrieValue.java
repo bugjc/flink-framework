@@ -1,7 +1,5 @@
 package com.bugjc.flink.config.model.tree;
 
-import com.bugjc.flink.config.util.PointToCamelUtil;
-
 import java.util.List;
 
 /**
@@ -10,23 +8,11 @@ import java.util.List;
  * @author aoki
  * @date 2020/8/10
  **/
-public class Trie {
+public class TrieValue {
     /**
      * 前缀树
      */
-    private static TrieNode root = new TrieNode("/");
-
-
-    public static void main(String[] args) {
-        Trie.insert("com.bugjc.flink.jdbc");
-        Trie.insert("com.bugjc.flink.jdbcJob");
-        Trie.insert("com.bugjc.flink.kafka.consumer.url");
-        Trie.print("", root.getChildren());
-
-        TrieNode trieNode = Trie.find("com.bugjc.flink");
-        Trie.print("", trieNode.getChildren());
-    }
-
+    private static TrieValueNode root = new TrieValueNode("/", true);
 
     /**
      * 构建一个 Trie 树
@@ -35,7 +21,7 @@ public class Trie {
      */
     public static void insert(String key) {
         //构建
-        String[] keyArr = PointToCamelUtil.camel2Point(key).split("\\.");
+        String[] keyArr = key.split("\\.");
         childrenInsert(0, keyArr, root.getChildren());
     }
 
@@ -46,14 +32,15 @@ public class Trie {
      * @param keyArr   --前缀节点数组集合
      * @param children --子节点列表
      */
-    private static void childrenInsert(int index, String[] keyArr, List<TrieNode> children) {
+    private static void childrenInsert(int index, String[] keyArr, List<TrieValueNode> children) {
         if (keyArr.length <= index) {
             return;
         }
+
         String childData = keyArr[index];
-        TrieNode childTrieNode = findChildren(childData, children);
+        TrieValueNode childTrieNode = findChildren(childData, children);
         if (childTrieNode == null) {
-            childTrieNode = new TrieNode(childData);
+            childTrieNode = new TrieValueNode(childData, true);
             children.add(childTrieNode);
         }
 
@@ -66,10 +53,10 @@ public class Trie {
      * @param prefix
      * @return
      */
-    public static TrieNode find(String prefix) {
+    public static TrieValueNode find(String prefix) {
         String[] keyArr = prefix.split("\\.");
-        TrieNode childTrieNode = null;
-        List<TrieNode> children = root.getChildren();
+        TrieValueNode childTrieNode = null;
+        List<TrieValueNode> children = root.getChildren();
         for (String key : keyArr) {
             childTrieNode = findChildren(key, children);
             if (childTrieNode == null) {
@@ -87,12 +74,12 @@ public class Trie {
      * @param children --节点集合列表
      * @return 存在返回节点，不存在返回 null
      */
-    private static TrieNode findChildren(String node, List<TrieNode> children) {
+    private static TrieValueNode findChildren(String node, List<TrieValueNode> children) {
         if (children == null) {
             return null;
         }
 
-        for (TrieNode child : children) {
+        for (TrieValueNode child : children) {
             if (child.getData().equals(node)) {
                 return child;
             }
@@ -115,13 +102,13 @@ public class Trie {
      * @param indent   --缩进
      * @param children --子节点列表
      */
-    public static void print(String indent, List<TrieNode> children) {
+    public static void print(String indent, List<TrieValueNode> children) {
         if (children == null) {
             return;
         }
 
         indent += "\t";
-        for (TrieNode child : children) {
+        for (TrieValueNode child : children) {
             System.out.println(indent + child.getData());
             print(indent, child.getChildren());
         }

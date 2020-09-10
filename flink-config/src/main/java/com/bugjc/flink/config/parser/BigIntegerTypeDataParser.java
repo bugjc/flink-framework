@@ -3,6 +3,7 @@ package com.bugjc.flink.config.parser;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -20,9 +21,10 @@ public class BigIntegerTypeDataParser implements TypeDataParser {
     @Override
     public <T> T getTypeData(NewField newField) {
         String value = newField.getValue();
-        return value == null
-                ? null
-                : (T) TypeUtils.castToBigInteger(value);
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        return (T) TypeUtils.castToBigInteger(value);
     }
 
     @Override

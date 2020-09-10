@@ -3,6 +3,7 @@ package com.bugjc.flink.config.parser;
 import com.alibaba.fastjson.util.TypeUtils;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -23,6 +24,9 @@ public class NumberTypeDataParser implements TypeDataParser {
     public <T> T getTypeData(NewField newField) {
         Type type = newField.getType();
         String value = newField.getValue();
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
         if (type == double.class || type == Double.class) {
             return (T) Double.valueOf(Double.parseDouble(value));
         }

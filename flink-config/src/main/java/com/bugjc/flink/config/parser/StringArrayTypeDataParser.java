@@ -3,6 +3,7 @@ package com.bugjc.flink.config.parser;
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
 import com.sun.xml.internal.fastinfoset.util.StringArray;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +19,10 @@ public class StringArrayTypeDataParser implements TypeDataParser {
 
     @Override
     public <T> T getTypeData(NewField newField) {
+        if (StringUtils.isBlank(newField.getValue())) {
+            return null;
+        }
+
         return (T) newField.getValue().split(",");
     }
 

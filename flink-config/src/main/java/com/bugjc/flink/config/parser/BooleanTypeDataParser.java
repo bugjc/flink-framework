@@ -2,6 +2,7 @@ package com.bugjc.flink.config.parser;
 
 import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,7 +19,11 @@ public class BooleanTypeDataParser implements TypeDataParser {
 
     @Override
     public <T> T getTypeData(NewField newField) {
-        Boolean aBoolean = Boolean.parseBoolean(newField.getValue());
+        String value = newField.getValue();
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        Boolean aBoolean = Boolean.parseBoolean(value);
         if (newField.getType() == AtomicBoolean.class) {
             return (T) new AtomicBoolean(new Boolean(aBoolean));
         }
