@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 分组容器
+ * 不可变对象
  *
  * @author aoki
  * @date 2020/9/9
@@ -17,95 +18,62 @@ public class GroupContainer {
      * 容器类型
      */
     @Getter
-    private ContainerType currentContainerType;
+    private final ContainerType currentContainerType;
     /**
      * 当前分组名（全局唯一）
      */
     @Getter
-    private String currentGroupName;
+    private final String currentGroupName;
 
     /**
      * 当前容器名
      */
     @Getter
-    private String currentContainerName;
+    private final String currentContainerName;
 
     /**
      * 上级容器类型
      */
     @Getter
-    private ContainerType upperContainerType;
+    private final ContainerType upperContainerType;
 
     /**
      * 上级分组名（全局唯一）
      */
     @Getter
-    private String upperGroupName;
+    private final String upperGroupName;
 
-
-    public GroupContainer setCurrentContainerType(ContainerType containerType) {
-        this.currentContainerType = containerType;
-        return this;
-    }
-
-    public GroupContainer setCurrentGroupName(String currentGroupName) {
+    /**
+     * 初始化容器
+     *
+     * @param currentContainerType
+     * @param currentGroupName
+     * @param upperContainerType
+     */
+    public GroupContainer(ContainerType currentContainerType, String currentGroupName, ContainerType upperContainerType) {
         if (currentGroupName.endsWith(Constants.SUFFIX)) {
             currentGroupName = currentGroupName.substring(0, currentGroupName.length() - 1);
         }
-
+        this.currentContainerType = currentContainerType;
         this.currentGroupName = currentGroupName;
-        return this;
+        this.currentContainerName = currentGroupName.substring(currentGroupName.lastIndexOf(Constants.SUFFIX) + 1);;
+        this.upperContainerType = upperContainerType;
+
+        if (currentContainerType == ContainerType.None) {
+            this.upperGroupName = this.currentGroupName;
+        } else {
+            this.upperGroupName = this.currentGroupName.substring(0, this.currentGroupName.lastIndexOf(Constants.SUFFIX));
+        }
     }
 
-    public GroupContainer setUpperContainerType(ContainerType containerType) {
-        this.upperContainerType = containerType;
-        return this;
-    }
-
-    public GroupContainer build() {
-
-        if (this.currentGroupName == null) {
-            throw new NullPointerException();
-        }
-
-        this.upperGroupName = this.currentGroupName;
-        this.currentContainerName = this.currentGroupName.substring(this.currentGroupName.lastIndexOf(Constants.SUFFIX) + 1);
-        return this;
-    }
-
-
-    public GroupContainer buildLevel1() {
-        if (this.currentContainerType == null) {
-            throw new NullPointerException();
-        }
-
-        if (this.currentGroupName == null) {
-            throw new NullPointerException();
-        }
-
-        String upperGroupName = this.currentGroupName.substring(0, this.currentGroupName.lastIndexOf(Constants.SUFFIX));
-        String currentContainerName = this.currentGroupName.substring(this.currentGroupName.lastIndexOf(Constants.SUFFIX) + 1);
-        this.upperGroupName = upperGroupName;
-        this.currentContainerName = currentContainerName;
-        return this;
-    }
-
-
-    public GroupContainer buildLevel2() {
-
-        if (this.currentContainerType == null) {
-            throw new NullPointerException();
-        }
-
-        if (this.currentGroupName == null) {
-            throw new NullPointerException();
-        }
-
-        String upperGroupName = this.currentGroupName.substring(0, this.currentGroupName.lastIndexOf(Constants.SUFFIX));
-        //list 的上级分组需要回退 2 步
-        String newUpperGroupName = upperGroupName.substring(0, upperGroupName.lastIndexOf(Constants.SUFFIX));
-        this.upperGroupName = newUpperGroupName;
-        this.currentContainerName = upperGroupName.replace(newUpperGroupName + Constants.SUFFIX, "");
-        return this;
+    /**
+     * 创建一个新的容器
+     * @param currentContainerType
+     * @param currentGroupName
+     * @param upperContainerType
+     * @return
+     */
+    public static GroupContainer create(ContainerType currentContainerType, String currentGroupName, ContainerType upperContainerType){
+        return new GroupContainer(currentContainerType, currentGroupName, upperContainerType);
     }
 }

@@ -19,7 +19,7 @@ import java.util.Map;
  **/
 @Data
 @Slf4j
-public class NewFieldOutput {
+public class Container {
 
     /**
      * 存储解析好的组件数据
@@ -80,14 +80,14 @@ public class NewFieldOutput {
             }
 
             //关联顶层容器
-            data.put(groupContainer.getCurrentContainerName(), create(groupContainer));
+            data.put(groupContainer.getCurrentContainerName(), createContainerObject(groupContainer));
             return;
         }
 
         if (upperContainer instanceof List) {
             List<Map<String, Object>> list = (List<Map<String, Object>>) upperContainer;
             //上级容器关联一个新的容器
-            Object object = create(groupContainer);
+            Object object = createContainerObject(groupContainer);
             if (object == null) {
                 return;
             }
@@ -100,7 +100,7 @@ public class NewFieldOutput {
                 return;
             }
             //上级容器关联一个新的容器
-            map.put(groupContainer.getCurrentContainerName(), create(groupContainer));
+            map.put(groupContainer.getCurrentContainerName(), createContainerObject(groupContainer));
             return;
         }
 
@@ -110,13 +110,12 @@ public class NewFieldOutput {
 
 
     /**
-     * 创建容器
+     * 创建容器的对象引用
      *
      * @param groupContainer
      * @return
      */
-    private Object create(GroupContainer groupContainer) {
-        ContainerType upperContainerType = groupContainer.getUpperContainerType();
+    private Object createContainerObject(GroupContainer groupContainer) {
         ContainerType currentContainerType = groupContainer.getCurrentContainerType();
         //获取当前组容器指定的对象，没有则创建对象并与容器建立从属关系
         Object object = objectReferenceTable.get(groupContainer.getCurrentGroupName());
@@ -126,47 +125,24 @@ public class NewFieldOutput {
                 return null;
             }
 
-            //None And HashMap
-            if ((upperContainerType == ContainerType.None && currentContainerType == ContainerType.HashMap)
-                    || (upperContainerType == ContainerType.None && currentContainerType == ContainerType.HashMap_Entity)) {
+            // HashMap
+            if (currentContainerType == ContainerType.HashMap
+                    || currentContainerType == ContainerType.HashMap_Entity
+                    || currentContainerType == ContainerType.Virtual_ArrayList_Entity
+                    || currentContainerType == ContainerType.Virtual_HashMap_Entity
+                    || currentContainerType == ContainerType.Virtual_HashMap) {
                 object = new HashMap<String, Object>();
                 objectReferenceTable.put(groupContainer.getCurrentGroupName(), object);
                 return object;
             }
 
-            //None And ArrayList
-            if ((upperContainerType == ContainerType.None && currentContainerType == ContainerType.ArrayList)
-                    || (upperContainerType == ContainerType.None && currentContainerType == ContainerType.ArrayList_Entity)) {
+            // ArrayList
+            if (currentContainerType == ContainerType.ArrayList
+                    || currentContainerType == ContainerType.ArrayList_Entity) {
                 object = new ArrayList<>();
                 objectReferenceTable.put(groupContainer.getCurrentGroupName(), object);
                 return object;
             }
-
-            //ArrayList_Entity
-            if ((upperContainerType == ContainerType.ArrayList_Entity && currentContainerType == ContainerType.Virtual_ArrayList_Entity)
-                    || (upperContainerType == ContainerType.ArrayList_Entity && currentContainerType == ContainerType.HashMap_Entity)) {
-                object = new HashMap<String, Object>();
-                objectReferenceTable.put(groupContainer.getCurrentGroupName(), object);
-                return object;
-            }
-
-            //HashMap_Entity
-            if ((upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.HashMap_Entity)
-                    || (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.Virtual_HashMap_Entity)
-                    || (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.HashMap)
-                    || (upperContainerType == ContainerType.HashMap_Entity && currentContainerType == ContainerType.Virtual_HashMap)) {
-                object = new HashMap<String, Object>();
-                objectReferenceTable.put(groupContainer.getCurrentGroupName(), object);
-                return object;
-            }
-
-            //HashMap
-            if ((upperContainerType == ContainerType.HashMap && currentContainerType == ContainerType.Virtual_HashMap)) {
-                object = new HashMap<String, Object>();
-                objectReferenceTable.put(groupContainer.getCurrentGroupName(), object);
-                return object;
-            }
-
 
             throw new NullPointerException();
         }
@@ -180,8 +156,11 @@ public class NewFieldOutput {
      * @param currentGroupContainer --当前容器组
      * @param currentField          --当前解析到的字段数据
      */
-    public void putValue(GroupContainer currentGroupContainer, NewField currentField) {
+    public void putContainerValue(GroupContainer currentGroupContainer, NewField currentField) {
         Object object = this.getContainer(currentGroupContainer);
+        if (object == null){
+            return;
+        }
         ((Map) object).put(currentField.getName(), TypeUtil.getTypeData(currentField));
     }
 }

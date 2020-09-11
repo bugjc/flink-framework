@@ -10,8 +10,8 @@ import com.bugjc.flink.config.exception.ApplicationContextException;
 import com.bugjc.flink.config.model.application.ApplicationResponse;
 import com.bugjc.flink.config.model.component.GroupContainer;
 import com.bugjc.flink.config.model.component.NewField;
-import com.bugjc.flink.config.model.component.NewFieldInput;
-import com.bugjc.flink.config.model.component.NewFieldOutput;
+import com.bugjc.flink.config.model.component.Params;
+import com.bugjc.flink.config.model.component.Container;
 import com.bugjc.flink.config.model.tree.Trie;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -80,14 +80,23 @@ public class InitializeUtil {
         }
 
         Reflections reflections;
-        Set<Class<?>> setClasses = new HashSet<>();
+        Set<Class<?>> allSetClasses = new HashSet<>();
         try {
             reflections = new Reflections(scanBasePackages);
-            setClasses = reflections.getTypesAnnotatedWith(ConfigurationProperties.class);
+            allSetClasses = reflections.getTypesAnnotatedWith(ConfigurationProperties.class);
         } catch (ReflectionsException reflectionsException) {
             //ignore
         }
 
+        //注解方式
+        Set<Class<?>> setClasses = new HashSet<>();
+        for (Class<?> setClass : allSetClasses) {
+            if (!existExcludeClass(setClass, excludeList)) {
+                setClasses.add(setClass);
+            }
+        }
+
+        //接口方式
         ServiceLoader<Config> serviceLoader = ServiceLoader.load(Config.class);
         for (Config config : serviceLoader) {
             if (!existExcludeClass(config.getClass(), excludeList)) {
@@ -130,7 +139,7 @@ public class InitializeUtil {
         //统一 key 的风格
         Map<String, String> newParameter = new HashMap<>();
         for (Map.Entry<String, String> entry : parameterTool.toMap().entrySet()) {
-            String key = PointToCamelUtil.camel2Point(entry.getKey());
+            String key = entry.getKey();
             newParameter.put(key, entry.getValue());
             //构建前缀树
             Trie.insert(key);
@@ -144,13 +153,10 @@ public class InitializeUtil {
             if (configurationProperties != null) {
                 String prefix = configurationProperties.prefix();
                 List<NewField> fields = Arrays.stream(setClass.getDeclaredFields()).map(field -> new NewField(field.getName(), field.getType(), field.getGenericType())).collect(Collectors.toList());
-                GroupContainer initGroupContainer = new GroupContainer()
-                        .setCurrentContainerType(ContainerType.None)
-                        .setCurrentGroupName(prefix)
-                        .setUpperContainerType(ContainerType.None)
-                        .buildLevel1();
-                NewFieldInput input = new NewFieldInput(initGroupContainer, fields, newParameter);
-                NewFieldOutput output = new NewFieldOutput();
+                GroupContainer initGroupContainer = new GroupContainer(ContainerType.None, prefix, ContainerType.None);
+                Params input = new Params(initGroupContainer, fields, newParameter);
+
+                Container output = new Container();
                 ParsingAttributesUtil.deconstruction(input, output);
                 String data = new Gson().toJson(output.getData());
                 componentConfigProperties.put(setClass.getName(), data);

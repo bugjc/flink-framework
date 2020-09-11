@@ -4,8 +4,8 @@ import com.bugjc.flink.config.core.constant.Constants;
 import com.bugjc.flink.config.core.enums.ContainerType;
 import com.bugjc.flink.config.model.component.GroupContainer;
 import com.bugjc.flink.config.model.component.NewField;
-import com.bugjc.flink.config.model.component.NewFieldInput;
-import com.bugjc.flink.config.model.component.NewFieldOutput;
+import com.bugjc.flink.config.model.component.Params;
+import com.bugjc.flink.config.model.component.Container;
 import com.bugjc.flink.config.model.tree.Trie;
 import com.bugjc.flink.config.model.tree.TrieNode;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ParsingAttributesUtil {
 
+    //AutomaticAssembly
 
     /**
      * 解构对象字段数据
@@ -32,35 +33,35 @@ public class ParsingAttributesUtil {
      * @param input
      * @param output
      */
-    public static void deconstruction(NewFieldInput input, NewFieldOutput output) {
+    public static void deconstruction(Params input, Container output) {
 
         ContainerType upperContainerType = input.getGroupContainer().getUpperContainerType();
         String groupName = input.getGroupContainer().getCurrentGroupName();
         for (NewField field : input.getFields()) {
             String fieldName = field.getName();
-            String camelName = PointToCamelUtil.camel2Point(fieldName);
-            String currentGroupName = getGroupName(groupName, camelName);
+            String currentGroupName = getGroupName(groupName, fieldName);
 
-            //1.获取当前容器对象
+            //获取当前容器对象
             ContainerType currentContainerType = ContainerType.getType(field);
-            GroupContainer currentGroupContainer = getCurrentGroupContainer(upperContainerType, currentContainerType, currentGroupName);
+            GroupContainer currentGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, upperContainerType);
 
-            //2.为当前容器创建一个存储数据的对象并将对象的应用保存到表中
-            output.putContainer(currentGroupContainer);
-
-            //3.检测是否配置了字段对应的属性
+            //检测是否配置了字段对应的属性
             TrieNode trieNode = Trie.find(currentGroupContainer.getCurrentGroupName());
             if (trieNode == null) {
                 //表示配置文件没有配置此属性
                 continue;
             }
 
-            //基础字段处理
+            //为当前容器创建一个存储数据的对象并将对象的引用保存到 Hash表 中
+            output.putContainer(currentGroupContainer);
+
+            //基础字段直接保存到容器中
             if (currentContainerType == ContainerType.Basic) {
                 saveData(input, output, currentGroupContainer, field);
                 continue;
             }
 
+            //ArrayList_Entity 类型的字段递归解构非字段部分，如：属性配置 com.bugjc.list.[0].field1 中的 [0] 部分
             if (currentContainerType == ContainerType.ArrayList_Entity) {
 
                 List<NewField> valueFields = new ArrayList<>();
@@ -70,14 +71,23 @@ public class ParsingAttributesUtil {
                     valueFields.add(newField);
                 }
 
-                //获取组名
-                GroupContainer nextGroupChildContainer = new GroupContainer()
-                        .setCurrentGroupName(currentGroupContainer.getCurrentGroupName())
-                        .setUpperContainerType(ContainerType.ArrayList_Entity)
-                        .build();
+                GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.ArrayList_Entity);
+                Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
+                deconstruction(newInput, output);
+                continue;
+            }
 
-                //递归
-                NewFieldInput newInput = new NewFieldInput(nextGroupChildContainer, valueFields, input.getOriginalData());
+            if (currentContainerType == ContainerType.Virtual_ArrayList_Entity) {
+                ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+                Type[] types = parameterizedType.getActualTypeArguments();
+                Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[types.length - 1];
+                //获取要处理的 entity 字段
+                List<NewField> valueFields = Arrays.stream(valueType.getDeclaredFields())
+                        .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
+                        .collect(Collectors.toList());
+
+                GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, upperContainerType);
+                Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
                 deconstruction(newInput, output);
                 continue;
             }
@@ -90,14 +100,8 @@ public class ParsingAttributesUtil {
                     valueFields.add(newField);
                 }
 
-                //获取组名
-                GroupContainer nextGroupChildContainer = new GroupContainer()
-                        .setCurrentGroupName(currentGroupContainer.getCurrentGroupName())
-                        .setUpperContainerType(ContainerType.HashMap_Entity)
-                        .build();
-
-                //递归
-                NewFieldInput newInput = new NewFieldInput(nextGroupChildContainer, valueFields, input.getOriginalData());
+                GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.HashMap_Entity);
+                Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
                 deconstruction(newInput, output);
                 continue;
             }
@@ -114,12 +118,8 @@ public class ParsingAttributesUtil {
                     valueFields.add(newField);
                 }
 
-                GroupContainer nextGroupContainer = new GroupContainer()
-                        .setCurrentGroupName(currentGroupContainer.getCurrentGroupName())
-                        .setUpperContainerType(ContainerType.HashMap)
-                        .build();
-
-                NewFieldInput newInput = new NewFieldInput(nextGroupContainer, valueFields, input.getOriginalData());
+                GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.HashMap);
+                Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
                 deconstruction(newInput, output);
                 continue;
             }
@@ -133,13 +133,8 @@ public class ParsingAttributesUtil {
                         .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
                         .collect(Collectors.toList());
 
-                GroupContainer nextGroupChildContainer = new GroupContainer()
-                        .setCurrentGroupName(currentGroupContainer.getCurrentGroupName())
-                        .setUpperContainerType(upperContainerType)
-                        .build();
-
-                //递归
-                NewFieldInput newInput = new NewFieldInput(nextGroupChildContainer, valueFields, input.getOriginalData());
+                GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, upperContainerType);
+                Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
                 deconstruction(newInput, output);
                 continue;
             }
@@ -147,26 +142,6 @@ public class ParsingAttributesUtil {
             if (currentContainerType == ContainerType.Virtual_HashMap) {
                 //普通 HashMap 当基础字段处理
                 saveData(input, output, currentGroupContainer, field);
-                continue;
-            }
-
-            if (currentContainerType == ContainerType.Virtual_ArrayList_Entity) {
-                ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
-                Type[] types = parameterizedType.getActualTypeArguments();
-                Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[types.length - 1];
-                //获取要处理的 entity 字段
-                List<NewField> valueFields = Arrays.stream(valueType.getDeclaredFields())
-                        .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
-                        .collect(Collectors.toList());
-
-                GroupContainer nextGroupChildContainer = new GroupContainer()
-                        .setCurrentGroupName(currentGroupContainer.getCurrentGroupName())
-                        .setUpperContainerType(upperContainerType)
-                        .build();
-
-                //递归
-                NewFieldInput newInput = new NewFieldInput(nextGroupChildContainer, valueFields, input.getOriginalData());
-                deconstruction(newInput, output);
                 continue;
             }
 
@@ -182,46 +157,12 @@ public class ParsingAttributesUtil {
      * @param currentGroupContainer
      * @param currentField
      */
-    private static void saveData(NewFieldInput input, NewFieldOutput output, GroupContainer currentGroupContainer, NewField currentField) {
+    private static void saveData(Params input, Container output, GroupContainer currentGroupContainer, NewField currentField) {
         String value = getValue(input.getOriginalData(), currentGroupContainer.getCurrentGroupName());
         currentField.setKey(currentField.getName());
         currentField.setValue(value);
         //基础数据类型的值处理
-        output.putValue(currentGroupContainer, currentField);
-    }
-
-    /**
-     * 获取当前容器
-     *
-     * @param upperContainerType
-     * @param currentContainerType
-     * @param currentGroupName
-     * @return
-     */
-    private static GroupContainer getCurrentGroupContainer(ContainerType upperContainerType, ContainerType currentContainerType, String currentGroupName) {
-        GroupContainer currentGroupContainer = null;
-        if (upperContainerType == ContainerType.None) {
-            currentGroupContainer = new GroupContainer()
-                    .setCurrentContainerType(currentContainerType)
-                    .setCurrentGroupName(currentGroupName)
-                    .setUpperContainerType(upperContainerType)
-                    .build();
-        } else if ((upperContainerType == ContainerType.HashMap_Entity) || upperContainerType == ContainerType.HashMap) {
-            currentGroupContainer = new GroupContainer()
-                    .setCurrentContainerType(currentContainerType)
-                    .setCurrentGroupName(currentGroupName)
-                    .setUpperContainerType(upperContainerType)
-                    .buildLevel1();
-        } else if ((upperContainerType == ContainerType.ArrayList_Entity) || (upperContainerType == ContainerType.ArrayList)) {
-            currentGroupContainer = new GroupContainer()
-                    .setCurrentContainerType(currentContainerType)
-                    .setCurrentGroupName(currentGroupName)
-                    .setUpperContainerType(upperContainerType)
-                    .buildLevel1();
-        } else {
-            throw new NullPointerException();
-        }
-        return currentGroupContainer;
+        output.putContainerValue(currentGroupContainer, currentField);
     }
 
     /**

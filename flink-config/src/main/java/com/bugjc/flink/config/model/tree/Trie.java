@@ -1,7 +1,5 @@
 package com.bugjc.flink.config.model.tree;
 
-import com.bugjc.flink.config.util.PointToCamelUtil;
-
 import java.util.List;
 
 /**
@@ -16,18 +14,6 @@ public class Trie {
      */
     private static TrieNode root = new TrieNode("/");
 
-
-    public static void main(String[] args) {
-        Trie.insert("com.bugjc.flink.jdbc");
-        Trie.insert("com.bugjc.flink.jdbcJob");
-        Trie.insert("com.bugjc.flink.kafka.consumer.url");
-        Trie.print("", root.getChildren());
-
-        TrieNode trieNode = Trie.find("com.bugjc.flink");
-        Trie.print("", trieNode.getChildren());
-    }
-
-
     /**
      * 构建一个 Trie 树
      *
@@ -35,7 +21,8 @@ public class Trie {
      */
     public static void insert(String key) {
         //构建
-        String[] keyArr = PointToCamelUtil.camel2Point(key).split("\\.");
+        //String[] keyArr = PointToCamelUtil.camel2Point(key).split("\\.");
+        String[] keyArr = key.split("\\.");
         childrenInsert(0, keyArr, root.getChildren());
     }
 
@@ -67,6 +54,7 @@ public class Trie {
      * @return
      */
     public static TrieNode find(String prefix) {
+        //prefix = PointToCamelUtil.camel2Point(prefix);
         String[] keyArr = prefix.split("\\.");
         TrieNode childTrieNode = null;
         List<TrieNode> children = root.getChildren();

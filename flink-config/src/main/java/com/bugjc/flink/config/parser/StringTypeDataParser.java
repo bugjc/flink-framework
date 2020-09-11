@@ -1,12 +1,9 @@
 package com.bugjc.flink.config.parser;
 
 import com.bugjc.flink.config.model.component.NewField;
-import com.bugjc.flink.config.model.tree.TrieNode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 字符串类型的数据解析
@@ -34,10 +31,5 @@ public class StringTypeDataParser implements TypeDataParser {
         }
 
         return (T) value;
-    }
-
-    @Override
-    public List<NewField> getNewFields(TrieNode trieNode) {
-        return trieNode.getChildren().stream().map(trieNode1 -> new NewField(trieNode1.getData(), String.class, String.class)).collect(Collectors.toList());
     }
 }
