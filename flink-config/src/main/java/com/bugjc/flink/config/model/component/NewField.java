@@ -1,5 +1,6 @@
 package com.bugjc.flink.config.model.component;
 
+import com.bugjc.flink.config.core.enums.ContainerType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -40,9 +41,9 @@ public class NewField {
     private String value;
 
     /**
-     * 是否虚拟字段
+     * 虚拟容器类型字段
      */
-    private boolean virtualField = false;
+    private ContainerType virtualType;
 
     public NewField(String name, Class<?> type, Type genericType) {
         this.name = name;
@@ -50,10 +51,10 @@ public class NewField {
         this.genericType = genericType;
     }
 
-    public NewField(String name, Class<?> type, Type genericType, boolean virtualField) {
+    public NewField(String name, Class<?> type, Type genericType, ContainerType virtualType) {
         this.name = name;
         this.type = type;
         this.genericType = genericType;
-        this.virtualField = virtualField;
+        this.virtualType = virtualType;
     }
 }

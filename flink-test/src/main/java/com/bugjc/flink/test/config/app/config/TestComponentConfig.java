@@ -4,7 +4,7 @@ import com.bugjc.flink.config.annotation.ConfigurationProperties;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
 
 /**
  * 测试组件自动注入属性值
@@ -38,18 +38,18 @@ public class TestComponentConfig implements Serializable {
     /**
      * map 基本对象
      */
-    private Map<String, String> map;
-
-    /**
-     * map 实体对象
-     * 结果示例：{"key1":{"field1":"1","field2":["1.1","1.2"]},"key2":{"field1":"2","field2":["2.1","2.2"]}}
-     */
+//    private Map<String, String> map;
+//
+//    /**
+//     * map 实体对象
+//     * 结果示例：{"key1":{"field1":"1","field2":["1.1","1.2"]},"key2":{"field1":"2","field2":["2.1","2.2"]}}
+//     */
 //    private Map<String, Entity> map1;
 
-//    /**
-//     * List<Entity>
-//     */
-//    private List<Entity> entities;
+    /**
+     * List<Entity>
+     */
+    private List<Entity> entities;
 
 //    /**
 //     * List<String>
