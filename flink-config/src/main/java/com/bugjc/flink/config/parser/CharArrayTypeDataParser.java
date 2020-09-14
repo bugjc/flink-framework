@@ -1,11 +1,7 @@
 package com.bugjc.flink.config.parser;
 
 import com.bugjc.flink.config.model.component.NewField;
-import com.bugjc.flink.config.model.tree.TrieNode;
-import com.sun.xml.internal.fastinfoset.util.CharArray;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 整型
@@ -19,11 +15,9 @@ public class CharArrayTypeDataParser implements TypeDataParser {
     @Override
     public <T> T getTypeData(NewField newField) {
         String value = newField.getValue();
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
         return (T) (value).toCharArray();
-    }
-
-    @Override
-    public List<NewField> getNewFields(TrieNode trieNode) {
-        return trieNode.getChildren().stream().map(trieNode1 -> new NewField(trieNode1.getData(), CharArray.class, CharArray.class)).collect(Collectors.toList());
     }
 }

@@ -2,10 +2,7 @@ package com.bugjc.flink.config.parser;
 
 import com.alibaba.fastjson.util.TypeUtils;
 import com.bugjc.flink.config.model.component.NewField;
-import com.bugjc.flink.config.model.tree.TrieNode;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 整型
@@ -18,11 +15,9 @@ public class IntegerTypeDataParser implements TypeDataParser {
 
     @Override
     public <T> T getTypeData(NewField newField) {
+        if (StringUtils.isBlank(newField.getValue())) {
+            return null;
+        }
         return (T) TypeUtils.castToInt(newField.getValue());
-    }
-
-    @Override
-    public List<NewField> getNewFields(TrieNode trieNode) {
-        return trieNode.getChildren().stream().map(trieNode1 -> new NewField(trieNode1.getData(), Integer.class, Integer.class)).collect(Collectors.toList());
     }
 }

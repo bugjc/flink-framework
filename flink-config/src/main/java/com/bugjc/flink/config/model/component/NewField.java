@@ -1,5 +1,6 @@
 package com.bugjc.flink.config.model.component;
 
+import com.bugjc.flink.config.core.enums.ContainerType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -39,14 +40,21 @@ public class NewField {
      */
     private String value;
 
-//    /**
-//     * trie 树，用来辅助生成要解析的 List<NewField>
-//     */
-//    private TrieNode trieNodes;
+    /**
+     * 虚拟容器类型字段
+     */
+    private ContainerType virtualType;
 
     public NewField(String name, Class<?> type, Type genericType) {
         this.name = name;
         this.type = type;
         this.genericType = genericType;
+    }
+
+    public NewField(String name, Class<?> type, Type genericType, ContainerType virtualType) {
+        this.name = name;
+        this.type = type;
+        this.genericType = genericType;
+        this.virtualType = virtualType;
     }
 }

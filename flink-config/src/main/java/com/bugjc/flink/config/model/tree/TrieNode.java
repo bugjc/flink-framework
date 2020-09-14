@@ -15,14 +15,9 @@ import java.util.List;
 public class TrieNode {
     private String data;
 
-    /**
-     * true:表示是一个前缀节点，false:表示是一个值
-     */
-    private Boolean isNode;
     private List<TrieNode> children = new ArrayList<>(4);
 
-    public TrieNode(String data, Boolean isNode) {
+    public TrieNode(String data) {
         this.data = data;
-        this.isNode = isNode;
     }
 }

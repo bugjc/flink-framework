@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.util.InitializeUtil;
 import com.bugjc.flink.config.util.StopWatch;
 import com.esotericsoftware.minlog.Log;
-import lombok.Getter;
+import com.google.gson.Gson;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -22,8 +22,14 @@ import java.util.Set;
  **/
 public class EnvironmentConfig implements Serializable {
 
-    @Getter
+    /**
+     * 原始变量 key 不处理，统一使用对象类方式获取属性值
+     */
     private final ParameterTool parameterTool;
+
+    private ParameterTool getParameterTool() {
+        return this.parameterTool;
+    }
 
     /**
      * 构建配置文件
@@ -96,7 +102,8 @@ public class EnvironmentConfig implements Serializable {
      * @return
      */
     public <T> T getComponent(Class<T> c) {
-        T t = JSON.parseObject(this.parameterTool.get(c.getName()), c);
+        Gson gson = new Gson();
+        T t = gson.fromJson(this.parameterTool.get(c.getName()), c);
         if (t == null) {
             throw new NullPointerException("this class is not a component!");
         }

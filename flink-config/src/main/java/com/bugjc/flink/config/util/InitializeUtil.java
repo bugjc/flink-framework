@@ -1,17 +1,19 @@
 package com.bugjc.flink.config.util;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.bugjc.flink.config.Config;
 import com.bugjc.flink.config.annotation.Application;
 import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
+import com.bugjc.flink.config.core.enums.ContainerType;
 import com.bugjc.flink.config.exception.ApplicationContextException;
 import com.bugjc.flink.config.model.application.ApplicationResponse;
+import com.bugjc.flink.config.model.component.GroupContainer;
 import com.bugjc.flink.config.model.component.NewField;
-import com.bugjc.flink.config.model.component.NewFieldInput;
-import com.bugjc.flink.config.model.component.NewFieldOutput;
+import com.bugjc.flink.config.model.component.Params;
+import com.bugjc.flink.config.model.component.Container;
 import com.bugjc.flink.config.model.tree.Trie;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -78,14 +80,23 @@ public class InitializeUtil {
         }
 
         Reflections reflections;
-        Set<Class<?>> setClasses = new HashSet<>();
+        Set<Class<?>> allSetClasses = new HashSet<>();
         try {
             reflections = new Reflections(scanBasePackages);
-            setClasses = reflections.getTypesAnnotatedWith(ConfigurationProperties.class);
+            allSetClasses = reflections.getTypesAnnotatedWith(ConfigurationProperties.class);
         } catch (ReflectionsException reflectionsException) {
             //ignore
         }
 
+        //注解方式
+        Set<Class<?>> setClasses = new HashSet<>();
+        for (Class<?> setClass : allSetClasses) {
+            if (!existExcludeClass(setClass, excludeList)) {
+                setClasses.add(setClass);
+            }
+        }
+
+        //接口方式
         ServiceLoader<Config> serviceLoader = ServiceLoader.load(Config.class);
         for (Config config : serviceLoader) {
             if (!existExcludeClass(config.getClass(), excludeList)) {
@@ -128,7 +139,7 @@ public class InitializeUtil {
         //统一 key 的风格
         Map<String, String> newParameter = new HashMap<>();
         for (Map.Entry<String, String> entry : parameterTool.toMap().entrySet()) {
-            String key = PointToCamelUtil.camel2Point(entry.getKey());
+            String key = entry.getKey();
             newParameter.put(key, entry.getValue());
             //构建前缀树
             Trie.insert(key);
@@ -140,14 +151,16 @@ public class InitializeUtil {
         for (Class<?> setClass : setClasses) {
             ConfigurationProperties configurationProperties = setClass.getAnnotation(ConfigurationProperties.class);
             if (configurationProperties != null) {
-
-                NewFieldOutput output = new NewFieldOutput();
+                String prefix = configurationProperties.prefix();
                 List<NewField> fields = Arrays.stream(setClass.getDeclaredFields()).map(field -> new NewField(field.getName(), field.getType(), field.getGenericType())).collect(Collectors.toList());
-                NewFieldInput input = new NewFieldInput("None", NewFieldInput.Type.None, configurationProperties.prefix(), fields, newParameter);
-                ParsingAttributesUtil.deconstruction(input, output);
+                GroupContainer initGroupContainer = new GroupContainer(ContainerType.None, prefix, ContainerType.None);
+                Params input = new Params(initGroupContainer, fields, newParameter);
 
-                componentConfigProperties.put(setClass.getName(), JSON.toJSONString(output.getData()));
-                log.info("Auto load component configuration：{}", JSON.toJSONString(output.getData()));
+                Container output = new Container();
+                ParsingAttributesUtil.deconstruction(input, output);
+                String data = new Gson().toJson(output.getData());
+                componentConfigProperties.put(setClass.getName(), data);
+                log.info("Auto load component configuration：{}", data);
             }
         }
 

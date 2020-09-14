@@ -52,13 +52,19 @@ public class TestComponentConfig implements Serializable {
      */
     private List<Entity> entities;
 
-    /**
-     * List<String>
-     */
-    private List<String> stringList;
-
-    /**
-     * List<Integer>
-     */
-    private List<Integer> integerList;
+//    /**
+//     * List<String>
+//     */
+//    private List<String> stringList;
+//
+//    /**
+//     * List<Integer>
+//     */
+//    private List<Integer> integerList;
+//
+//    /**
+//     * Enum
+//     * 结果示例：{"publishType":"Private"}
+//     */
+//    private PublishType publishType;
 }

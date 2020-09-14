@@ -1,9 +1,11 @@
 package com.bugjc.flink.config.util;
 
 import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.parser.deserializer.EnumDeserializer;
 import com.alibaba.fastjson.parser.deserializer.JavaBeanDeserializer;
+import com.alibaba.fastjson.parser.deserializer.MapDeserializer;
+import com.alibaba.fastjson.serializer.CollectionCodec;
 import com.bugjc.flink.config.model.component.NewField;
-import com.bugjc.flink.config.model.tree.TrieNode;
 import com.bugjc.flink.config.parser.*;
 
 import java.lang.reflect.Type;
@@ -29,18 +31,11 @@ public class TypeUtil {
     }
 
     private static void initTypeDataParser() {
-//        PARSER_MAP.put(Map.class, MapDeserializer.instance);
-//        PARSER_MAP.put(HashMap.class, MapDeserializer.instance);
-//        PARSER_MAP.put(LinkedHashMap.class, MapDeserializer.instance);
-//        PARSER_MAP.put(TreeMap.class, MapDeserializer.instance);
-//        PARSER_MAP.put(ConcurrentMap.class, MapDeserializer.instance);
-//        PARSER_MAP.put(ConcurrentHashMap.class, MapDeserializer.instance);
-//
+
+        //基本类型的 list 数据处理
         PARSER_MAP.put(Collection.class, CollectionTypeDataParser.INSTANCE);
         PARSER_MAP.put(List.class, CollectionTypeDataParser.INSTANCE);
         PARSER_MAP.put(ArrayList.class, CollectionTypeDataParser.INSTANCE);
-//
-//        PARSER_MAP.put(Object.class, JavaObjectDeserializer.instance);
 
         PARSER_MAP.put(String.class, StringTypeDataParser.INSTANCE);
         PARSER_MAP.put(StringBuffer.class, StringTypeDataParser.INSTANCE);
@@ -69,11 +64,6 @@ public class TypeUtil {
         PARSER_MAP.put(AtomicBoolean.class, BooleanTypeDataParser.INSTANCE);
         PARSER_MAP.put(AtomicInteger.class, IntegerTypeDataParser.INSTANCE);
         PARSER_MAP.put(AtomicLong.class, LongTypeDataParser.INSTANCE);
-
-//        PARSER_MAP.put(Serializable.class, JavaObjectDeserializer.instance);
-//        PARSER_MAP.put(Cloneable.class, JavaObjectDeserializer.instance);
-//        PARSER_MAP.put(Comparable.class, JavaObjectDeserializer.instance);
-//        PARSER_MAP.put(Closeable.class, JavaObjectDeserializer.instance);
     }
 
 
@@ -85,33 +75,48 @@ public class TypeUtil {
         return ParserConfig.global.getDeserializer(type) instanceof JavaBeanDeserializer;
     }
 
+    public static boolean isEnum(Type type) {
+        return ParserConfig.global.getDeserializer(type) instanceof EnumDeserializer;
+    }
+
+    public static boolean isList(Type type) {
+        return ParserConfig.global.getDeserializer(type) instanceof CollectionCodec;
+    }
+
+    public static boolean isMap(Type type) {
+        return ParserConfig.global.getDeserializer(type) instanceof MapDeserializer;
+    }
+
+    public static boolean isBasic(Type type) {
+        if (isJavaBean(type)) {
+            return false;
+        } else if (isMap(type)) {
+            return false;
+        } else if (isList(type)) {
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
     /**
      * 获取数据
      *
-     * @param newField
      * @param <T>
+     * @param newField
      * @return
      */
     public static <T> T getTypeData(NewField newField) {
         TypeDataParser typeDataParser = PARSER_MAP.get(newField.getType());
-        if (typeDataParser == null) {
-            return null;
+        if (typeDataParser != null) {
+            return typeDataParser.getTypeData(newField);
         }
-        return typeDataParser.getTypeData(newField);
-    }
 
-    /**
-     * 获取要处理的字段列表
-     *
-     * @param type
-     * @param trieNode
-     * @return
-     */
-    public static List<NewField> getNewFields(Class<?> type, TrieNode trieNode) {
-        TypeDataParser typeDataParser = PARSER_MAP.get(type);
-        if (typeDataParser == null) {
-            return null;
+        if (isEnum(newField.getType())) {
+            return PARSER_MAP.get(String.class).getTypeData(newField);
         }
-        return typeDataParser.getNewFields(trieNode);
+
+        return null;
     }
 }

@@ -2,13 +2,18 @@ package com.bugjc.flink.test.config.app.config;
 
 import lombok.Data;
 
-@Data
-public class Entity{
-    private String field1;
-    private String[] field2;
+import java.io.Serializable;
+import java.util.Map;
 
-    public Entity(String field1, String[] field2) {
-        this.field1 = field1;
-        this.field2 = field2;
+@Data
+public class Entity implements Serializable {
+    private String entity1;
+    private String[] entity2;
+    private Map<String, Entity2> entity3;
+
+    public Entity(String s, String[] strings, Map<String, Entity2> o) {
+        this.entity1 = s;
+        this.entity2 = strings;
+        this.entity3 = o;
     }
 }
