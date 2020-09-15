@@ -159,7 +159,7 @@ public class Container {
     public void putContainerValue(GroupContainer currentGroupContainer, NewField currentField) {
         Object object = this.getContainer(currentGroupContainer);
         if (object == null){
-            return;
+            throw new NullPointerException();
         }
         ((Map) object).put(currentField.getName(), TypeUtil.getTypeData(currentField));
     }
