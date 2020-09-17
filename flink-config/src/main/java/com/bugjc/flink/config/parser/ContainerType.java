@@ -1,6 +1,5 @@
-package com.bugjc.flink.config.core.enums;
+package com.bugjc.flink.config.parser;
 
-import com.bugjc.flink.config.model.component.NewField;
 import com.bugjc.flink.config.util.TypeUtil;
 
 import java.lang.reflect.ParameterizedType;
@@ -52,7 +51,7 @@ public enum ContainerType {
                 return ContainerType.ArrayList_Entity;
             }
             return ContainerType.ArrayList;
-        } else if (TypeUtil.isBasic(type)) {
+        } else if (TypeUtil.isBasic(type) || TypeUtil.isEnum(type)) {
             return ContainerType.Basic;
         } else {
             return ContainerType.None;

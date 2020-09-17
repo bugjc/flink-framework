@@ -1,13 +1,12 @@
-package com.bugjc.flink.config.model.component;
+package com.bugjc.flink.config.parser;
 
 import com.bugjc.flink.config.core.constant.Constants;
-import com.bugjc.flink.config.core.enums.ContainerType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 分组容器
- * 不可变对象
+ * 不可变对象,用于定位容器存储对象
  *
  * @author aoki
  * @date 2020/9/9
@@ -19,6 +18,7 @@ public class GroupContainer {
      */
     @Getter
     private final ContainerType currentContainerType;
+
     /**
      * 当前分组名（全局唯一）
      */

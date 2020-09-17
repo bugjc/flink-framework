@@ -1,7 +1,5 @@
-package com.bugjc.flink.config.model.component;
+package com.bugjc.flink.config.parser;
 
-import com.bugjc.flink.config.core.enums.ContainerType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.lang.reflect.Type;
@@ -13,7 +11,6 @@ import java.lang.reflect.Type;
  * @date 2020/8/12
  **/
 @Data
-@AllArgsConstructor
 public class NewField {
     /**
      * 字段名
@@ -29,16 +26,6 @@ public class NewField {
      * 字段类型
      */
     private Type genericType;
-
-    /**
-     * 配置文件定义的 key
-     */
-    private String key;
-
-    /**
-     * 配置文件定义的 value
-     */
-    private String value;
 
     /**
      * 虚拟容器类型字段

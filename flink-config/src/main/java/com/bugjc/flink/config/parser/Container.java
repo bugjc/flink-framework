@@ -1,8 +1,6 @@
-package com.bugjc.flink.config.model.component;
+package com.bugjc.flink.config.parser;
 
-import com.bugjc.flink.config.core.enums.ContainerType;
-import com.bugjc.flink.config.model.tree.TrieValue;
-import com.bugjc.flink.config.util.TypeUtil;
+import com.bugjc.flink.config.parser.converter.NewFieldValueConverterUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +29,10 @@ public class Container {
      */
     private Map<String, Object> objectReferenceTable = new HashMap<>();
 
+    /**
+     * 当前分组容器
+     */
+    private GroupContainer currentGroupContainer;
 
     /**
      * 按类型获取容器的指针
@@ -38,10 +40,8 @@ public class Container {
      * @return 返回容器的指针
      */
     private Object getContainer(GroupContainer groupContainer) {
-        TrieValue.print();
         ContainerType upperContainerType = groupContainer.getUpperContainerType();
-        ContainerType currentContainerType = groupContainer.getCurrentContainerType();
-        if (upperContainerType == ContainerType.None && currentContainerType == ContainerType.Basic) {
+        if (upperContainerType == ContainerType.None) {
             //基础类型直接返回顶层容器
             return data;
         }
@@ -71,8 +71,8 @@ public class Container {
      * @param groupContainer
      */
     public void putContainer(GroupContainer groupContainer) {
-        TrieValue.insert(groupContainer.getCurrentGroupName());
         //创建并关联容器
+        this.currentGroupContainer = groupContainer;
         Object upperContainer = objectReferenceTable.get(groupContainer.getUpperGroupName());
         if (upperContainer == null) {
             if (data.containsKey(groupContainer.getCurrentContainerName())) {
@@ -151,16 +151,17 @@ public class Container {
 
 
     /**
-     * 按类型选择容器存储数据
+     * 选择当前容器插入数据
      *
-     * @param currentGroupContainer --当前容器组
-     * @param currentField          --当前解析到的字段数据
+     * @param fieldName
+     * @param type
+     * @param value
      */
-    public void putContainerValue(GroupContainer currentGroupContainer, NewField currentField) {
+    public void putContainerValue(String fieldName, Class<?> type, String value) {
         Object object = this.getContainer(currentGroupContainer);
-        if (object == null){
+        if (object == null) {
             throw new NullPointerException();
         }
-        ((Map) object).put(currentField.getName(), TypeUtil.getTypeData(currentField));
+        ((Map) object).put(fieldName, NewFieldValueConverterUtil.getNewFieldValue(type, value));
     }
 }

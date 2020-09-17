@@ -1,0 +1,76 @@
+package com.bugjc.flink.config.parser.converter;
+
+import com.bugjc.flink.config.parser.converter.impl.*;
+import com.bugjc.flink.config.util.TypeUtil;
+
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+/**
+ * 类型数据解析工具类
+ *
+ * @author aoki
+ * @date 2020/9/16
+ **/
+public class NewFieldValueConverterUtil {
+
+
+    private final static Map<Type, NewFieldValueConverter> REGISTER = new HashMap<Type, NewFieldValueConverter>() {{
+        put(Collection.class, CollectionNewFieldValueConverter.INSTANCE);
+        put(List.class, CollectionNewFieldValueConverter.INSTANCE);
+        put(ArrayList.class, CollectionNewFieldValueConverter.INSTANCE);
+
+        put(String.class, StringNewFieldValueConverter.INSTANCE);
+        put(StringBuffer.class, StringNewFieldValueConverter.INSTANCE);
+        put(StringBuilder.class, StringNewFieldValueConverter.INSTANCE);
+        put(char.class, CharacterNewFieldValueConverter.INSTANCE);
+        put(Character.class, CharacterNewFieldValueConverter.INSTANCE);
+        put(byte.class, NumberNewFieldValueConverter.INSTANCE);
+        put(Byte.class, NumberNewFieldValueConverter.INSTANCE);
+        put(short.class, NumberNewFieldValueConverter.INSTANCE);
+        put(Short.class, NumberNewFieldValueConverter.INSTANCE);
+        put(int.class, IntegerNewFieldValueConverter.INSTANCE);
+        put(Integer.class, IntegerNewFieldValueConverter.INSTANCE);
+        put(long.class, LongNewFieldValueConverter.INSTANCE);
+        put(Long.class, LongNewFieldValueConverter.INSTANCE);
+        put(BigInteger.class, BigIntegerNewFieldValueConverter.INSTANCE);
+        put(BigDecimal.class, BigDecimalNewFieldValueConverter.INSTANCE);
+        put(float.class, FloatNewFieldValueConverter.INSTANCE);
+        put(Float.class, FloatNewFieldValueConverter.INSTANCE);
+        put(double.class, NumberNewFieldValueConverter.INSTANCE);
+        put(Double.class, NumberNewFieldValueConverter.INSTANCE);
+        put(boolean.class, BooleanNewFieldValueConverter.INSTANCE);
+        put(Boolean.class, BooleanNewFieldValueConverter.INSTANCE);
+        put(char[].class, CharArrayNewFieldValueConverter.INSTANCE);
+        put(String[].class, StringArrayNewFieldValueConverter.INSTANCE);
+
+        put(AtomicBoolean.class, BooleanNewFieldValueConverter.INSTANCE);
+        put(AtomicInteger.class, IntegerNewFieldValueConverter.INSTANCE);
+        put(AtomicLong.class, LongNewFieldValueConverter.INSTANCE);
+    }};
+
+    /**
+     * 获取类型转换后的值
+     *
+     * @param type
+     * @param value
+     * @return
+     */
+    public static Object getNewFieldValue(Class<?> type, String value) {
+        NewFieldValueConverter converter = REGISTER.get(type);
+        if (converter != null) {
+            return converter.transform(value);
+        }
+
+        if (TypeUtil.isEnum(type)) {
+            return REGISTER.get(String.class).transform(value);
+        }
+
+        return null;
+    }
+}
