@@ -30,10 +30,10 @@ public class NewFieldValueConverterUtil {
         put(StringBuilder.class, StringNewFieldValueConverter.INSTANCE);
         put(char.class, CharacterNewFieldValueConverter.INSTANCE);
         put(Character.class, CharacterNewFieldValueConverter.INSTANCE);
-        put(byte.class, NumberNewFieldValueConverter.INSTANCE);
-        put(Byte.class, NumberNewFieldValueConverter.INSTANCE);
-        put(short.class, NumberNewFieldValueConverter.INSTANCE);
-        put(Short.class, NumberNewFieldValueConverter.INSTANCE);
+        put(byte.class, ByteNewFieldValueConverter.INSTANCE);
+        put(Byte.class, ByteNewFieldValueConverter.INSTANCE);
+        put(short.class, ShortNewFieldValueConverter.INSTANCE);
+        put(Short.class, ShortNewFieldValueConverter.INSTANCE);
         put(int.class, IntegerNewFieldValueConverter.INSTANCE);
         put(Integer.class, IntegerNewFieldValueConverter.INSTANCE);
         put(long.class, LongNewFieldValueConverter.INSTANCE);
@@ -42,8 +42,8 @@ public class NewFieldValueConverterUtil {
         put(BigDecimal.class, BigDecimalNewFieldValueConverter.INSTANCE);
         put(float.class, FloatNewFieldValueConverter.INSTANCE);
         put(Float.class, FloatNewFieldValueConverter.INSTANCE);
-        put(double.class, NumberNewFieldValueConverter.INSTANCE);
-        put(Double.class, NumberNewFieldValueConverter.INSTANCE);
+        put(double.class, DoubleNewFieldValueConverter.INSTANCE);
+        put(Double.class, DoubleNewFieldValueConverter.INSTANCE);
         put(boolean.class, BooleanNewFieldValueConverter.INSTANCE);
         put(Boolean.class, BooleanNewFieldValueConverter.INSTANCE);
         put(char[].class, CharArrayNewFieldValueConverter.INSTANCE);
@@ -61,7 +61,7 @@ public class NewFieldValueConverterUtil {
      * @param value
      * @return
      */
-    public static Object getNewFieldValue(Class<?> type, String value) {
+    public static Object getNewFieldValue(Type type, String value) {
         NewFieldValueConverter converter = REGISTER.get(type);
         if (converter != null) {
             return converter.transform(value);

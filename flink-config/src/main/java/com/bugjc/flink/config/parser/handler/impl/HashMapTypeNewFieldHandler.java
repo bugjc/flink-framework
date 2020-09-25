@@ -1,12 +1,9 @@
 package com.bugjc.flink.config.parser.handler.impl;
 
-import com.bugjc.flink.config.parser.ContainerType;
-import com.bugjc.flink.config.parser.Container;
-import com.bugjc.flink.config.parser.GroupContainer;
-import com.bugjc.flink.config.parser.NewField;
-import com.bugjc.flink.config.parser.Params;
 import com.bugjc.flink.config.model.tree.TrieNode;
+import com.bugjc.flink.config.parser.*;
 import com.bugjc.flink.config.parser.handler.NewFieldHandler;
+import com.bugjc.flink.config.util.TypeUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -16,7 +13,7 @@ import java.util.List;
 import static com.bugjc.flink.config.parser.PropertyParser.deconstruction;
 
 /**
- * 基础字段处理器
+ * HashMap 字段处理器
  *
  * @author aoki
  * @date 2020/9/16
@@ -31,13 +28,19 @@ public class HashMapTypeNewFieldHandler implements NewFieldHandler {
         ContainerType currentContainerType = output.getCurrentGroupContainer().getCurrentContainerType();
         String currentGroupName = output.getCurrentGroupContainer().getCurrentGroupName();
         ParameterizedType parameterizedType = (ParameterizedType) input.getCurrentField().getGenericType();
-        Type[] types = parameterizedType.getActualTypeArguments();
-        Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[types.length - 1];
+        //获取 Map<key,value> 类型
+        Class<?> keyType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+        Type valueType = parameterizedType.getActualTypeArguments()[1];
+
+        ContainerType virtualType = ContainerType.Virtual_HashMap;
+        if (TypeUtil.isList(valueType)) {
+            virtualType = ContainerType.ArrayList;
+        }
 
         List<NewField> valueFields = new ArrayList<>();
         List<TrieNode> children = input.getTrieNode().getChildren();
         for (TrieNode child : children) {
-            NewField newField = new NewField(child.getData(), valueType, valueType, ContainerType.Virtual_HashMap);
+            NewField newField = new NewField(child.getData(), keyType, valueType, virtualType);
             valueFields.add(newField);
         }
 

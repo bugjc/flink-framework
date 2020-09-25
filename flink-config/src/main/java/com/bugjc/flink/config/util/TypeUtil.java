@@ -6,6 +6,7 @@ import com.alibaba.fastjson.parser.deserializer.JavaBeanDeserializer;
 import com.alibaba.fastjson.parser.deserializer.MapDeserializer;
 import com.alibaba.fastjson.serializer.CollectionCodec;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
@@ -46,5 +47,20 @@ public class TypeUtil {
         }
 
         return !isList(type);
+    }
+
+    /**
+     * 获取泛型的最后一个类型
+     *
+     * @param valueType
+     * @return
+     */
+    public static Type getLastType(Type valueType) {
+        if (TypeUtil.isMap(valueType) || TypeUtil.isList(valueType)) {
+            Type[] types = ((ParameterizedType) valueType).getActualTypeArguments();
+            valueType = types[types.length - 1];
+            return getLastType(valueType);
+        }
+        return valueType;
     }
 }

@@ -24,13 +24,14 @@ public class PropertyParser {
      */
     private static Map<ContainerType, NewFieldHandler> REGISTER_TYPE_HANDLER = new HashMap<ContainerType, NewFieldHandler>() {{
         put(ContainerType.Basic, BasicTypeNewFieldHandler.INSTANCE);
-        put(ContainerType.ArrayList, BasicTypeNewFieldHandler.INSTANCE);
+        put(ContainerType.ArrayList, ArrayListTypeNewFieldHandler.INSTANCE);
+        put(ContainerType.Virtual_ArrayList, VirtualArrayListTypeNewFieldHandler.INSTANCE);
         put(ContainerType.ArrayList_Entity, ArrayListEntityTypeNewFieldHandler.INSTANCE);
         put(ContainerType.Virtual_ArrayList_Entity, VirtualArrayListEntityTypeNewFieldHandler.INSTANCE);
         put(ContainerType.HashMap_Entity, HashMapEntityTypeNewFieldHandler.INSTANCE);
         put(ContainerType.Virtual_HashMap_Entity, VirtualHashMapEntityTypeNewFieldHandler.INSTANCE);
         put(ContainerType.HashMap, HashMapTypeNewFieldHandler.INSTANCE);
-        put(ContainerType.Virtual_HashMap, BasicTypeNewFieldHandler.INSTANCE);
+        put(ContainerType.Virtual_HashMap, VirtualHashMapTypeNewFieldHandler.INSTANCE);
     }};
 
     /**

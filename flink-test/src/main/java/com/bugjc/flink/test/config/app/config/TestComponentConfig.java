@@ -67,4 +67,34 @@ public class TestComponentConfig implements Serializable {
      * 结果示例：{"publishType":"Private"}
      */
     private PublishType publishType;
+
+    /**
+     * 嵌套 map 对象
+     */
+    private Map<String, Map<String, String>> map2;
+
+    /**
+     * 嵌套 map 对象
+     */
+    private Map<String, Map<String, Entity>> map3;
+
+    /**
+     * map 嵌套 list entity
+     */
+    private Map<String, List<Entity>> map4;
+
+    /**
+     * map 嵌套 list basic
+     */
+    private Map<String, List<String>> map5;
+
+    /**
+     * map 嵌套 list basic
+     */
+    private Map<String, List<List<String>>> map6;
+
+    /**
+     * map 嵌套 list Entity
+     */
+    private Map<String, List<List<Entity>>> map7;
 }

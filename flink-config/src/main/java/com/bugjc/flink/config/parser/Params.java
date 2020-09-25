@@ -4,6 +4,7 @@ import com.bugjc.flink.config.model.tree.TrieNode;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -80,8 +81,9 @@ public class Params {
      * @param valueType
      * @return
      */
-    public List<NewField> getEntityFields(Class<?> valueType) {
-        return Arrays.stream(valueType.getDeclaredFields())
+    public List<NewField> getEntityFields(Type valueType) {
+        Class<?> entityClass = (Class<?>) valueType;
+        return Arrays.stream(entityClass.getDeclaredFields())
                 .map(fieldMap -> new NewField(fieldMap.getName(), fieldMap.getType(), fieldMap.getGenericType()))
                 .collect(Collectors.toList());
     }

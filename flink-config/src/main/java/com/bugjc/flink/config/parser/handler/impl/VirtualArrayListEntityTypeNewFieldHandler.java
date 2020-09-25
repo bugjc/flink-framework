@@ -1,12 +1,12 @@
 package com.bugjc.flink.config.parser.handler.impl;
 
-import com.bugjc.flink.config.parser.ContainerType;
 import com.bugjc.flink.config.parser.Container;
+import com.bugjc.flink.config.parser.ContainerType;
 import com.bugjc.flink.config.parser.GroupContainer;
 import com.bugjc.flink.config.parser.Params;
 import com.bugjc.flink.config.parser.handler.NewFieldHandler;
 
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 import static com.bugjc.flink.config.parser.PropertyParser.deconstruction;
 
@@ -27,8 +27,9 @@ public class VirtualArrayListEntityTypeNewFieldHandler implements NewFieldHandle
         ContainerType upperContainerType = output.getCurrentGroupContainer().getUpperContainerType();
         String currentGroupName = output.getCurrentGroupContainer().getCurrentGroupName();
 
-        ParameterizedType parameterizedType = (ParameterizedType) input.getCurrentField().getGenericType();
-        Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+        Type valueType = input.getCurrentField().getGenericType();
+//        ParameterizedType parameterizedType = (ParameterizedType) input.getCurrentField().getGenericType();
+//        Class<?> valueType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
 
         GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, upperContainerType);
         Params newInput = Params.create(nextGroupContainer, input.getEntityFields(valueType), input.getOriginalData());

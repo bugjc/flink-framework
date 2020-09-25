@@ -4,10 +4,8 @@ import com.bugjc.flink.config.parser.converter.NewFieldValueConverterUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * 解析的组件数据对象
@@ -61,7 +59,12 @@ public class Container {
             return objectReferenceTable.get(groupContainer.getUpperGroupName());
         }
 
-        throw new NullPointerException();
+        if (upperContainerType == ContainerType.ArrayList) {
+            //返回对象引用
+            return objectReferenceTable.get(groupContainer.getCurrentGroupName());
+        }
+
+        throw new NullPointerException("getContainer() 缺少" + upperContainerType + "容器类型的处理方式。");
     }
 
 
@@ -85,13 +88,13 @@ public class Container {
         }
 
         if (upperContainer instanceof List) {
-            List<Map<String, Object>> list = (List<Map<String, Object>>) upperContainer;
+            List<Object> list = (List<Object>) upperContainer;
             //上级容器关联一个新的容器
             Object object = createContainerObject(groupContainer);
             if (object == null) {
                 return;
             }
-            list.add((Map<String, Object>) object);
+            list.add(object);
             return;
 
         } else if (upperContainer instanceof Map) {
@@ -138,6 +141,7 @@ public class Container {
 
             // ArrayList
             if (currentContainerType == ContainerType.ArrayList
+                    || currentContainerType == ContainerType.Virtual_ArrayList
                     || currentContainerType == ContainerType.ArrayList_Entity) {
                 object = new ArrayList<>();
                 objectReferenceTable.put(groupContainer.getCurrentGroupName(), object);
@@ -157,11 +161,17 @@ public class Container {
      * @param type
      * @param value
      */
-    public void putContainerValue(String fieldName, Class<?> type, String value) {
+    public void putContainerValue(String fieldName, Type type, String value) {
         Object object = this.getContainer(currentGroupContainer);
         if (object == null) {
             throw new NullPointerException();
         }
-        ((Map) object).put(fieldName, NewFieldValueConverterUtil.getNewFieldValue(type, value));
+
+        if (object instanceof List) {
+            ((List) object).addAll((Collection) Objects.requireNonNull(NewFieldValueConverterUtil.getNewFieldValue(type, value)));
+        } else {
+            ((Map) object).put(fieldName, NewFieldValueConverterUtil.getNewFieldValue(type, value));
+        }
+
     }
 }

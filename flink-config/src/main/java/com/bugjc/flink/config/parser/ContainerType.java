@@ -18,6 +18,7 @@ public enum ContainerType {
     Basic,
     // ArrayList
     ArrayList,
+    Virtual_ArrayList,
     ArrayList_Entity,
     Virtual_ArrayList_Entity,
     // HashMap          如：Map<String,String> 类型的变量
@@ -40,18 +41,19 @@ public enum ContainerType {
             return field.getVirtualType();
         }
 
-        Type type = field.getType();
-        if (TypeUtil.isMap(type)) {
-            if (isJavaBean(field)) {
+        /*Type type = field.getType();*/
+        Type genericType = field.getGenericType();
+        if (TypeUtil.isMap(genericType)) {
+            if (isJavaBean(genericType)) {
                 return ContainerType.HashMap_Entity;
             }
             return ContainerType.HashMap;
-        } else if (TypeUtil.isList(type)) {
-            if (isJavaBean(field)) {
+        } else if (TypeUtil.isList(genericType)) {
+            if (isJavaBean(genericType)) {
                 return ContainerType.ArrayList_Entity;
             }
             return ContainerType.ArrayList;
-        } else if (TypeUtil.isBasic(type) || TypeUtil.isEnum(type)) {
+        } else if (TypeUtil.isBasic(genericType) || TypeUtil.isEnum(genericType)) {
             return ContainerType.Basic;
         } else {
             return ContainerType.None;
@@ -61,18 +63,20 @@ public enum ContainerType {
     /**
      * 判断字段类型是否为 Java Bean
      *
-     * @param field
+     * @param genericType
      * @return
      */
-    private static boolean isJavaBean(NewField field) {
-        boolean isParameterizedType = field.getGenericType() instanceof ParameterizedType;
+    private static boolean isJavaBean(Type genericType) {
+        boolean isParameterizedType = genericType instanceof ParameterizedType;
         if (isParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+            ParameterizedType parameterizedType = (ParameterizedType) genericType;
             Type[] types = parameterizedType.getActualTypeArguments();
             //获取最后的泛型类
-            Class<?> valueType = (Class<?>) types[types.length - 1];
+            Type valueType = TypeUtil.getLastType(types[types.length - 1]);
             return TypeUtil.isJavaBean(valueType);
         }
         return false;
     }
+
+
 }

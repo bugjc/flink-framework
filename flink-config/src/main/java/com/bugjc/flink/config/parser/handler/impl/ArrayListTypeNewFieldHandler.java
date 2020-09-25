@@ -13,18 +13,18 @@ import java.util.List;
 import static com.bugjc.flink.config.parser.PropertyParser.deconstruction;
 
 /**
- * List<Entity> 字段处理器
+ * List 字段处理器
  *
  * @author aoki
  * @date 2020/9/16
  **/
-public class ArrayListEntityTypeNewFieldHandler implements NewFieldHandler {
+public class ArrayListTypeNewFieldHandler implements NewFieldHandler {
 
-    public final static ArrayListEntityTypeNewFieldHandler INSTANCE = new ArrayListEntityTypeNewFieldHandler();
+    public final static ArrayListTypeNewFieldHandler INSTANCE = new ArrayListTypeNewFieldHandler();
 
     @Override
     public void process(Params input, Container output) {
-        //ArrayList_Entity 类型的字段递归解构非字段部分，如：属性配置 com.bugjc.list.[0].field1 中的 [0] 部分
+
         NewField field = input.getCurrentField();
         ContainerType currentContainerType = output.getCurrentGroupContainer().getCurrentContainerType();
         String currentGroupName = output.getCurrentGroupContainer().getCurrentGroupName();
@@ -36,21 +36,17 @@ public class ArrayListEntityTypeNewFieldHandler implements NewFieldHandler {
             List<NewField> valueFields = new ArrayList<>();
             List<TrieNode> children = input.getTrieNode().getChildren();
             for (TrieNode child : children) {
-                NewField newField = new NewField(child.getData(), field.getType(), valueType, ContainerType.ArrayList_Entity);
+                NewField newField = new NewField(child.getData(), field.getType(), valueType, ContainerType.Virtual_ArrayList);
                 valueFields.add(newField);
             }
 
-            GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.ArrayList_Entity);
+            GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.ArrayList);
             Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
             deconstruction(newInput, output);
             return;
         } else if (TypeUtil.isMap(valueType)) {
             throw new NullPointerException("TODO");
         }
-
-        //TODO 无需循环直接跳转到 Virtual ArrList Handler
         System.out.println();
-
-
     }
 }
