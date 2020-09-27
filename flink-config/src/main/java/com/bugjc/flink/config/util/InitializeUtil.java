@@ -5,14 +5,15 @@ import com.bugjc.flink.config.Config;
 import com.bugjc.flink.config.annotation.Application;
 import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
-import com.bugjc.flink.config.core.enums.ContainerType;
+import com.bugjc.flink.config.parser.ContainerType;
 import com.bugjc.flink.config.exception.ApplicationContextException;
 import com.bugjc.flink.config.model.application.ApplicationResponse;
-import com.bugjc.flink.config.model.component.GroupContainer;
-import com.bugjc.flink.config.model.component.NewField;
-import com.bugjc.flink.config.model.component.Params;
-import com.bugjc.flink.config.model.component.Container;
+import com.bugjc.flink.config.parser.GroupContainer;
+import com.bugjc.flink.config.parser.NewField;
+import com.bugjc.flink.config.parser.Params;
+import com.bugjc.flink.config.parser.Container;
 import com.bugjc.flink.config.model.tree.Trie;
+import com.bugjc.flink.config.parser.PropertyParser;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -145,7 +146,6 @@ public class InitializeUtil {
             Trie.insert(key);
         }
 
-
         //解析属性集合中按规则定义的各个组件配置属性值
         Map<String, String> componentConfigProperties = new HashMap<>();
         for (Class<?> setClass : setClasses) {
@@ -153,11 +153,12 @@ public class InitializeUtil {
             if (configurationProperties != null) {
                 String prefix = configurationProperties.prefix();
                 List<NewField> fields = Arrays.stream(setClass.getDeclaredFields()).map(field -> new NewField(field.getName(), field.getType(), field.getGenericType())).collect(Collectors.toList());
-                GroupContainer initGroupContainer = new GroupContainer(ContainerType.None, prefix, ContainerType.None);
-                Params input = new Params(initGroupContainer, fields, newParameter);
 
+                GroupContainer initGroupContainer = GroupContainer.create(ContainerType.None, prefix, ContainerType.None);
+                Params input = Params.create(initGroupContainer, fields, newParameter);
                 Container output = new Container();
-                ParsingAttributesUtil.deconstruction(input, output);
+                PropertyParser.deconstruction(input, output);
+
                 String data = new Gson().toJson(output.getData());
                 componentConfigProperties.put(setClass.getName(), data);
                 log.info("Auto load component configuration：{}", data);
