@@ -30,7 +30,6 @@ public class HashMapEntityTypeNewFieldHandler implements NewFieldHandler {
         Class<?> keyType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
         Type valueType = parameterizedType.getActualTypeArguments()[1];
 
-
         ContainerType containerType;
         if (TypeUtil.isList(valueType)) {
             containerType = ContainerType.ArrayList_Entity;
