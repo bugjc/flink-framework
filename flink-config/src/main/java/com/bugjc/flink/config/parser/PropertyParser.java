@@ -1,6 +1,5 @@
 package com.bugjc.flink.config.parser;
 
-import com.bugjc.flink.config.core.constant.Constants;
 import com.bugjc.flink.config.model.tree.Trie;
 import com.bugjc.flink.config.model.tree.TrieNode;
 import com.bugjc.flink.config.parser.handler.NewFieldHandler;

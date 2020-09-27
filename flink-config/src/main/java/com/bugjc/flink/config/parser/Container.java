@@ -124,7 +124,7 @@ public class Container {
         Object object = objectReferenceTable.get(groupContainer.getCurrentGroupName());
         if (object == null) {
 
-            if (currentContainerType == ContainerType.Basic) {
+            if (currentContainerType == ContainerType.Basic || currentContainerType == ContainerType.Virtual_HashMap) {
                 return null;
             }
 
@@ -132,8 +132,7 @@ public class Container {
             if (currentContainerType == ContainerType.HashMap
                     || currentContainerType == ContainerType.HashMap_Entity
                     || currentContainerType == ContainerType.Virtual_ArrayList_Entity
-                    || currentContainerType == ContainerType.Virtual_HashMap_Entity
-                    || currentContainerType == ContainerType.Virtual_HashMap) {
+                    || currentContainerType == ContainerType.Virtual_HashMap_Entity) {
                 object = new HashMap<String, Object>();
                 objectReferenceTable.put(groupContainer.getCurrentGroupName(), object);
                 return object;
@@ -167,11 +166,27 @@ public class Container {
             throw new NullPointerException();
         }
 
-        if (object instanceof List) {
-            ((List) object).addAll((Collection) Objects.requireNonNull(NewFieldValueConverterUtil.getNewFieldValue(type, value)));
-        } else {
-            ((Map) object).put(fieldName, NewFieldValueConverterUtil.getNewFieldValue(type, value));
-        }
+        putContainerValue(object, fieldName, type, value);
+    }
 
+    /**
+     * @param object
+     * @param fieldName
+     * @param type
+     * @param value
+     */
+    private void putContainerValue(Object object, String fieldName, Type type, String value) {
+        if (object instanceof List) {
+            List<Object> list = ((List) object);
+            list.addAll((Collection) Objects.requireNonNull(NewFieldValueConverterUtil.getNewFieldValue(type, value)));
+        } else {
+            Map<String, Object> map = ((Map<String, Object>) object);
+            if (map.containsKey(fieldName) && map.get(fieldName) != null) {
+                object = map.get(fieldName);
+                putContainerValue(object, fieldName, type, value);
+                return;
+            }
+            map.put(fieldName, NewFieldValueConverterUtil.getNewFieldValue(type, value));
+        }
     }
 }

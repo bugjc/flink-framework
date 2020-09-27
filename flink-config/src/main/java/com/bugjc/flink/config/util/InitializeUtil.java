@@ -146,7 +146,6 @@ public class InitializeUtil {
             Trie.insert(key);
         }
 
-
         //解析属性集合中按规则定义的各个组件配置属性值
         Map<String, String> componentConfigProperties = new HashMap<>();
         for (Class<?> setClass : setClasses) {

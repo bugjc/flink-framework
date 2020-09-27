@@ -7,7 +7,7 @@ import com.bugjc.flink.config.util.ClassUtil;
 import com.bugjc.flink.connector.jdbc.DataSourceConfig;
 import com.bugjc.flink.connector.kafka.KafkaConsumerConfig;
 import com.bugjc.flink.connector.kafka.KafkaProducerConfig;
-import com.bugjc.flink.test.config.app.config.TestComponentConfig;
+import com.bugjc.flink.test.config.app.config.ParamConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.ExecutionMode;
@@ -47,9 +47,9 @@ public class ConfigApplication {
 
 
         //4.测试组件参数自动配置
-        TestComponentConfig testComponentConfig = environmentConfig.getComponent(TestComponentConfig.class);
-        log.info("Result = {}", JSON.toJSONString(testComponentConfig));
-        ClassUtil.print(testComponentConfig);
+        ParamConfig paramConfig = environmentConfig.getComponent(ParamConfig.class);
+        log.info("Result = {}", JSON.toJSONString(paramConfig));
+        ClassUtil.print(paramConfig);
 
     }
 }

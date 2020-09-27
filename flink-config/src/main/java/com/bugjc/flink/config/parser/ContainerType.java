@@ -1,7 +1,5 @@
 package com.bugjc.flink.config.parser;
 
-import com.bugjc.flink.config.util.TypeUtil;
-
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 

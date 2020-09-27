@@ -1,4 +1,4 @@
-package com.bugjc.flink.config.util;
+package com.bugjc.flink.config.parser;
 
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.parser.deserializer.EnumDeserializer;

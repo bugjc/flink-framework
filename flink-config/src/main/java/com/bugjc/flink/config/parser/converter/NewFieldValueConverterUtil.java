@@ -1,7 +1,7 @@
 package com.bugjc.flink.config.parser.converter;
 
 import com.bugjc.flink.config.parser.converter.impl.*;
-import com.bugjc.flink.config.util.TypeUtil;
+import com.bugjc.flink.config.parser.TypeUtil;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;

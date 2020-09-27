@@ -3,7 +3,7 @@ package com.bugjc.flink.config.parser.handler.impl;
 import com.bugjc.flink.config.model.tree.TrieNode;
 import com.bugjc.flink.config.parser.*;
 import com.bugjc.flink.config.parser.handler.NewFieldHandler;
-import com.bugjc.flink.config.util.TypeUtil;
+import com.bugjc.flink.config.parser.TypeUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -30,27 +30,57 @@ public class HashMapEntityTypeNewFieldHandler implements NewFieldHandler {
         Class<?> keyType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
         Type valueType = parameterizedType.getActualTypeArguments()[1];
 
-        ContainerType virtualType = ContainerType.Virtual_HashMap_Entity;
         if (TypeUtil.isList(valueType)) {
-            virtualType = ContainerType.ArrayList_Entity;
-        } else {
-            //TODO
+            List<NewField> valueFields = new ArrayList<>();
+            List<TrieNode> children = input.getTrieNode().getChildren();
+            for (TrieNode child : children) {
+                NewField newField = new NewField(child.getData(), keyType, valueType, ContainerType.ArrayList_Entity);
+                valueFields.add(newField);
+            }
+
+            GroupContainer nextGroupContainer = GroupContainer.create(
+                    output.getCurrentGroupContainer().getCurrentContainerType(),
+                    output.getCurrentGroupContainer().getCurrentGroupName(),
+                    ContainerType.HashMap_Entity);
+
+            Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
+            deconstruction(newInput, output);
+            return;
+        } else if (TypeUtil.isMap(valueType)){
+            List<NewField> valueFields = new ArrayList<>();
+            List<TrieNode> children = input.getTrieNode().getChildren();
+            for (TrieNode child : children) {
+                NewField newField = new NewField(child.getData(), keyType, valueType, ContainerType.HashMap_Entity);
+                valueFields.add(newField);
+            }
+
+            GroupContainer nextGroupContainer = GroupContainer.create(
+                    output.getCurrentGroupContainer().getCurrentContainerType(),
+                    output.getCurrentGroupContainer().getCurrentGroupName(),
+                    ContainerType.HashMap_Entity);
+
+            Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
+            deconstruction(newInput, output);
+            return;
+        } else if (TypeUtil.isJavaBean(valueType)){
+            List<NewField> valueFields = new ArrayList<>();
+            List<TrieNode> children = input.getTrieNode().getChildren();
+            for (TrieNode child : children) {
+                NewField newField = new NewField(child.getData(), keyType, valueType, ContainerType.Virtual_HashMap_Entity);
+                valueFields.add(newField);
+            }
+
+
+            GroupContainer nextGroupContainer = GroupContainer.create(
+                    output.getCurrentGroupContainer().getCurrentContainerType(),
+                    output.getCurrentGroupContainer().getCurrentGroupName(),
+                    ContainerType.HashMap_Entity);
+
+            Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
+            deconstruction(newInput, output);
+            return;
         }
 
-        List<NewField> valueFields = new ArrayList<>();
-        List<TrieNode> children = input.getTrieNode().getChildren();
-        for (TrieNode child : children) {
-            NewField newField = new NewField(child.getData(), keyType, valueType, virtualType);
-            valueFields.add(newField);
-        }
-
-
-        GroupContainer nextGroupContainer = GroupContainer.create(
-                output.getCurrentGroupContainer().getCurrentContainerType(),
-                output.getCurrentGroupContainer().getCurrentGroupName(),
-                ContainerType.HashMap_Entity);
-
-        Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
-        deconstruction(newInput, output);
+        throw new NullPointerException();
     }
 }

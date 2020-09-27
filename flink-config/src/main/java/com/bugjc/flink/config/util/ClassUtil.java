@@ -1,6 +1,7 @@
 package com.bugjc.flink.config.util;
 
 import com.alibaba.fastjson.JSON;
+import com.bugjc.flink.config.parser.TypeUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;

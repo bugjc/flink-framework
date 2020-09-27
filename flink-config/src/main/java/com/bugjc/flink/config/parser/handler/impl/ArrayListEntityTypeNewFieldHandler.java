@@ -3,7 +3,7 @@ package com.bugjc.flink.config.parser.handler.impl;
 import com.bugjc.flink.config.model.tree.TrieNode;
 import com.bugjc.flink.config.parser.*;
 import com.bugjc.flink.config.parser.handler.NewFieldHandler;
-import com.bugjc.flink.config.util.TypeUtil;
+import com.bugjc.flink.config.parser.TypeUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -45,11 +45,33 @@ public class ArrayListEntityTypeNewFieldHandler implements NewFieldHandler {
             deconstruction(newInput, output);
             return;
         } else if (TypeUtil.isMap(valueType)) {
-            throw new NullPointerException("TODO");
+            List<NewField> valueFields = new ArrayList<>();
+            List<TrieNode> children = input.getTrieNode().getChildren();
+            for (TrieNode child : children) {
+                NewField newField = new NewField(child.getData(), field.getType(), valueType, ContainerType.HashMap_Entity);
+                valueFields.add(newField);
+            }
+
+            GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.ArrayList_Entity);
+            Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
+            deconstruction(newInput, output);
+            return;
+        } else if (TypeUtil.isJavaBean(valueType)){
+
+            List<NewField> valueFields = new ArrayList<>();
+            List<TrieNode> children = input.getTrieNode().getChildren();
+            for (TrieNode child : children) {
+                NewField newField = new NewField(child.getData(), field.getType(), valueType, ContainerType.Virtual_ArrayList_Entity);
+                valueFields.add(newField);
+            }
+
+            GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.ArrayList_Entity);
+            Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
+            deconstruction(newInput, output);
+            return;
         }
 
-        //TODO 无需循环直接跳转到 Virtual ArrList Handler
-        System.out.println();
+        throw new NullPointerException();
 
 
     }

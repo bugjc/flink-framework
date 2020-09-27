@@ -1,6 +1,5 @@
 package com.bugjc.flink.config.parser;
 
-import com.bugjc.flink.config.core.constant.Constants;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

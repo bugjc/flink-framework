@@ -15,10 +15,10 @@ import java.util.Map;
  **/
 @Data
 @ConfigurationProperties(prefix = "test.component.")
-public class TestComponentConfig implements Serializable {
+public class ParamConfig implements Serializable {
 
     /**
-     * 基本数据类型
+     * Basic
      */
     private Byte aByte;
     private Short bShort;
@@ -30,71 +30,35 @@ public class TestComponentConfig implements Serializable {
     private Boolean hBoolean;
     private String iString;
     private String iStringChild;
-
-    /**
-     * 数组
-     */
     private String[] array;
 
     /**
-     * map 基本对象
-     */
-    private Map<String, String> map;
-
-    /**
-     * map 实体对象
-     * 结果示例：{"key1":{"field1":"1","field2":["1.1","1.2"]},"key2":{"field1":"2","field2":["2.1","2.2"]}}
-     */
-    private Map<String, Entity> map1;
-
-    /**
-     * List<Entity>
-     */
-    private List<Entity> entities;
-
-    /**
-     * List<String>
-     */
-    private List<String> stringList;
-
-    /**
-     * List<Integer>
-     */
-    private List<Integer> integerList;
-
-    /**
      * Enum
-     * 结果示例：{"publishType":"Private"}
      */
     private PublishType publishType;
 
     /**
-     * 嵌套 map 对象
+     * Map
      */
+    private Map<String, String> map;
+    private Map<String, Entity> map1;
     private Map<String, Map<String, String>> map2;
-
-    /**
-     * 嵌套 map 对象
-     */
     private Map<String, Map<String, Entity>> map3;
-
-    /**
-     * map 嵌套 list entity
-     */
     private Map<String, List<Entity>> map4;
-
-    /**
-     * map 嵌套 list basic
-     */
     private Map<String, List<String>> map5;
-
-    /**
-     * map 嵌套 list basic
-     */
     private Map<String, List<List<String>>> map6;
+    private Map<String, List<List<Entity>>> map7;
 
     /**
-     * map 嵌套 list Entity
+     * List
      */
-    private Map<String, List<List<Entity>>> map7;
+    private List<String> list;
+    private List<Entity> list1;
+    private List<List<String>> list2;
+    private List<List<Entity>> list3;
+    private List<Map<String, String>> list4;
+    private List<Map<String, Entity>> list5;
+    private List<Map<String, Map<String, String>>> list6;
+    private List<Map<String, Map<String, Entity>>> list7;
+    private List<Map<String, List<Entity>>> list8;
 }

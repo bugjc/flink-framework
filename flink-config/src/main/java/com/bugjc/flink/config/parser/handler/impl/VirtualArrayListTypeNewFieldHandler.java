@@ -2,8 +2,8 @@ package com.bugjc.flink.config.parser.handler.impl;
 
 import com.bugjc.flink.config.parser.Container;
 import com.bugjc.flink.config.parser.Params;
+import com.bugjc.flink.config.parser.TypeUtil;
 import com.bugjc.flink.config.parser.handler.NewFieldHandler;
-import com.bugjc.flink.config.util.TypeUtil;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -25,10 +25,8 @@ public class VirtualArrayListTypeNewFieldHandler implements NewFieldHandler {
         ParameterizedType parameterizedType = (ParameterizedType) input.getCurrentField().getGenericType();
         Type valueType = parameterizedType.getActualTypeArguments()[0];
 
-        if (TypeUtil.isList(valueType)) {
-            ArrayListTypeNewFieldHandler.INSTANCE.process(input, output);
-        } else if (TypeUtil.isMap(valueType)) {
-            throw new NullPointerException("TODO");
+        if (!TypeUtil.isBasic(valueType)) {
+            throw new NullPointerException();
         }
 
         //重写 type,并使用基础类型处理器设置值
