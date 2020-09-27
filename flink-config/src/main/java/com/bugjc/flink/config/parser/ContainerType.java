@@ -35,8 +35,8 @@ public enum ContainerType {
      */
     public static ContainerType getType(NewField field) {
 
-        if (field.getVirtualType() != null) {
-            return field.getVirtualType();
+        if (field.getContainerType() != null) {
+            return field.getContainerType();
         }
 
         /*Type type = field.getType();*/

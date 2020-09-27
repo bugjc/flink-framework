@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,24 @@ public class Params {
      */
     public static Params create(GroupContainer groupContainer, List<NewField> fields, Map<String, String> originalData) {
         return new Params(groupContainer, fields, originalData);
+    }
+
+
+    /**
+     * 获取要处理的基础类型字段列表
+     * @param keyType
+     * @param valueType
+     * @param containerType
+     * @return
+     */
+    public List<NewField> getFields(Class<?> keyType, Type valueType, ContainerType containerType) {
+        List<NewField> valueFields = new ArrayList<>();
+        List<TrieNode> children = trieNode.getChildren();
+        for (TrieNode child : children) {
+            NewField newField = new NewField(child.getData(), keyType, valueType, containerType);
+            valueFields.add(newField);
+        }
+        return valueFields;
     }
 
     /**

@@ -31,34 +31,23 @@ public class ArrayListTypeNewFieldHandler implements NewFieldHandler {
         ParameterizedType parameterizedType = (ParameterizedType) input.getCurrentField().getGenericType();
         Type valueType = parameterizedType.getActualTypeArguments()[0];
 
+        ContainerType containerType;
         if (TypeUtil.isList(valueType)) {
-            List<NewField> valueFields = new ArrayList<>();
-            List<TrieNode> children = input.getTrieNode().getChildren();
-            for (TrieNode child : children) {
-                NewField newField = new NewField(child.getData(), field.getType(), valueType, ContainerType.ArrayList);
-                valueFields.add(newField);
-            }
-
-            GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.ArrayList);
-            Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
-            deconstruction(newInput, output);
-            return;
+            containerType = ContainerType.ArrayList;
         } else if (TypeUtil.isMap(valueType)) {
-            List<NewField> valueFields = new ArrayList<>();
-            List<TrieNode> children = input.getTrieNode().getChildren();
-            for (TrieNode child : children) {
-                NewField newField = new NewField(child.getData(), field.getType(), valueType, ContainerType.HashMap);
-                valueFields.add(newField);
-            }
-
-            GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.ArrayList);
-            Params newInput = Params.create(nextGroupContainer, valueFields, input.getOriginalData());
-            deconstruction(newInput, output);
-            return;
+            containerType = ContainerType.HashMap;
         } else if (TypeUtil.isBasic(valueType)) {
             VirtualArrayListTypeNewFieldHandler.INSTANCE.process(input, output);
             return;
+        } else {
+            throw new NullPointerException();
         }
-        throw new NullPointerException();
+
+        GroupContainer nextGroupContainer = GroupContainer.create(currentContainerType, currentGroupName, ContainerType.ArrayList);
+        Params newInput = Params.create(
+                nextGroupContainer,
+                input.getFields(field.getType(), valueType, containerType),
+                input.getOriginalData());
+        deconstruction(newInput, output);
     }
 }

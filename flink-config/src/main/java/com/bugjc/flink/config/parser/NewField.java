@@ -28,9 +28,9 @@ public class NewField {
     private Type genericType;
 
     /**
-     * 虚拟容器类型字段
+     * 容器类型字段
      */
-    private ContainerType virtualType;
+    private ContainerType containerType;
 
     public NewField(String name, Class<?> type, Type genericType) {
         this.name = name;
@@ -38,10 +38,10 @@ public class NewField {
         this.genericType = genericType;
     }
 
-    public NewField(String name, Class<?> type, Type genericType, ContainerType virtualType) {
+    public NewField(String name, Class<?> type, Type genericType, ContainerType containerType) {
         this.name = name;
         this.type = type;
         this.genericType = genericType;
-        this.virtualType = virtualType;
+        this.containerType = containerType;
     }
 }

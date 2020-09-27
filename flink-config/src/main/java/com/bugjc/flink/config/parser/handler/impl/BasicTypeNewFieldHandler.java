@@ -21,16 +21,6 @@ public class BasicTypeNewFieldHandler implements NewFieldHandler {
 
     @Override
     public void process(Params input, Container output) {
-        saveData(input, output);
-    }
-
-    /**
-     * 保存数据
-     *
-     * @param input
-     * @param output
-     */
-    private void saveData(Params input, Container output) {
         NewField currentField = input.getCurrentField();
         String value = getValue(input.getOriginalData(), output.getCurrentGroupContainer().getCurrentGroupName());
         //基础数据类型的值处理
