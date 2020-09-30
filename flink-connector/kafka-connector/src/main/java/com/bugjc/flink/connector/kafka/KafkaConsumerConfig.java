@@ -6,6 +6,9 @@ import com.alibaba.fastjson.annotation.JSONType;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
 import com.bugjc.flink.connector.kafka.config.AbstractKafkaConsumerConfig;
 import com.bugjc.flink.connector.kafka.schema.GeneralKafkaSchema;
+import com.google.gson.Gson;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -26,28 +29,20 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
-@JSONType(includes = {"bootstrapServers","groupId","keyDeserializer","valueDeserializer","autoOffsetReset","automaticPartition"})
 @ConfigurationProperties(prefix = "flink.kafka.consumer.")
 public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements Serializable {
 
-    @JSONField(name = "bootstrap.servers")
     private String bootstrapServers;
-    @JSONField(name = "group.id")
     private String groupId;
-    @JSONField(name = "key.deserializer")
     private String keyDeserializer;
-    @JSONField(name = "value.deserializer")
     private String valueDeserializer;
-    @JSONField(name = "auto.offset.reset")
     private String autoOffsetReset;
-    @JSONField(name = "flink.partition-discovery.interval-millis")
     private String automaticPartition;
 
     /**
      * topic 值有三类，分别对应：单 topic、多 topic 和 topic 正则表达式消费数据的方式。
      * 例：单 topic --> testTopicName;多 topic --> testTopicName,testTopicName1;topic 正则表达式 --> testTopicName[0-9]
      */
-    @JSONField(name = "topic")
     private String topic;
 
     /**
@@ -56,9 +51,17 @@ public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements 
      * @return
      */
     @Override
-    @JSONField(serialize = false)
     public Properties getProperties() {
-        return JSON.parseObject(JSON.toJSONString(this), Properties.class);
+        Properties properties = new Properties();
+        properties.setProperty("bootstrap.servers", this.bootstrapServers);
+        properties.setProperty("group.id", this.groupId);
+        properties.setProperty("key.deserializer", this.keyDeserializer);
+        properties.setProperty("value.deserializer", this.valueDeserializer);
+        properties.setProperty("auto.offset.reset", this.autoOffsetReset);
+        if (this.automaticPartition !=null){
+            properties.setProperty("flink.partition-discovery.interval-millis", this.automaticPartition);
+        }
+        return properties;
     }
 
     /**

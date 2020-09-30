@@ -1,34 +1,48 @@
-package com.bugjc.flink.test.kafka.app;
+package com.bugjc.flink.connector.kafka.test;
 
 import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
-import com.bugjc.flink.config.annotation.Application;
+import com.bugjc.flink.config.annotation.ApplicationTest;
+import com.bugjc.flink.connector.kafka.KafkaConsumerConfig;
 import com.bugjc.flink.connector.kafka.KafkaProducerConfig;
-import com.bugjc.flink.test.kafka.app.model.KafkaEvent;
+import com.bugjc.flink.connector.kafka.test.event.KafkaEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.Future;
 
-/**
- * 程序入口
- *
- * @author aoki
- * @date 2020/7/14
- **/
 @Slf4j
-@Application
-public class KafkaProducerApplication {
-    public static void main(String[] args) throws Exception {
-        //1.环境参数配置
-        EnvironmentConfig environmentConfig = new EnvironmentConfig(args);
+@ApplicationTest
+class KafkaProducerConfigTest {
+    /**
+     * 构建环境配置文件对象
+     */
+    private static EnvironmentConfig environmentConfig;
 
-        //2.获取 kafka 生产者配置
+    @BeforeAll
+    static void init() {
+        try {
+            environmentConfig = new EnvironmentConfig(new String[]{});
+        } catch (Exception exception) {
+            log.info("{}", exception.getMessage());
+            log.error("初始化环境配置失败！");
+        }
+    }
+
+    @Test
+    void getKafkaProducerConfig() throws Exception {
+        StreamExecutionEnvironment env = environmentConfig.getStreamExecutionEnvironment();
         KafkaProducerConfig kafkaProducerConfig = environmentConfig.getComponent(KafkaProducerConfig.class);
+        log.info("kafkaProducerConfig 配置信息：{}", kafkaProducerConfig);
 
-        //3.构建 kafka 生产者并发送消息
         KafkaProducer<String, String> producer = kafkaProducerConfig.createKafkaProducer();
         for (int i = 0; i < 100; i++) {
             //同步发送

@@ -22,7 +22,9 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
 public class KafkaConsumerApplication {
 
     /**
+     * 测试流程：先启动当前程序，然后启动 com.bugjc.flink.test.kafka.app.KafkaProducerApplication 程序发送消息
      * 注意事项：如消费者配置的 topic 是正则表达式则需要先初始化（创建）一个可匹配的 topic。
+     *
      * @param args
      * @throws Exception
      */
