@@ -1,8 +1,5 @@
 package com.bugjc.flink.connector.kafka;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.annotation.JSONType;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
 import com.bugjc.flink.connector.kafka.config.AbstractKafkaProducerConfig;
 import com.bugjc.flink.connector.kafka.schema.GeneralKafkaSchema;
@@ -25,18 +22,12 @@ import java.util.Properties;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
-@JSONType(includes = {"bootstrapServers","keySerializer","valueSerializer"})
 @ConfigurationProperties(prefix = "flink.kafka.producer.")
 public class KafkaProducerConfig extends AbstractKafkaProducerConfig implements Serializable {
 
-    @JSONField(name = "bootstrap.servers")
     private String bootstrapServers;
-    @JSONField(name = "key.serializer")
     private String keySerializer;
-    @JSONField(name = "value.serializer")
     private String valueSerializer;
-
-    @JSONField(name = "topic")
     private String topic;
 
     /**
@@ -45,9 +36,12 @@ public class KafkaProducerConfig extends AbstractKafkaProducerConfig implements 
      * @return
      */
     @Override
-    @JSONField(serialize = false)
     public Properties getProperties() {
-        return JSON.parseObject(JSON.toJSONString(this), Properties.class);
+        Properties properties = new Properties();
+        properties.setProperty("bootstrap.servers", this.bootstrapServers);
+        properties.setProperty("key.serializer", this.keySerializer);
+        properties.setProperty("value.serializer", this.valueSerializer);
+        return properties;
     }
 
     /**

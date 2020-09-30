@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.ExecutionMode;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.shaded.curator4.org.apache.curator.shaded.com.google.common.collect.Lists;
+import org.apache.flink.shaded.guava18.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -17,6 +17,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.util.Collector;
 
@@ -33,6 +34,11 @@ import java.util.List;
 @Application
 public class SinkMySqlApplication {
 
+    /**
+     * 测试流程：先启动当前程序，然后启动 com.bugjc.flink.test.kafka.app.KafkaProducerApplication 程序发送消息
+     * @param args
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
 
         //1.环境参数配置

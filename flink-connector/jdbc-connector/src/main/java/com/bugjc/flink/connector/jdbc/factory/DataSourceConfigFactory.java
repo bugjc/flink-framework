@@ -32,6 +32,7 @@ public class DataSourceConfigFactory {
      * @param dataSourceConfig --数据源配置
      */
     public static synchronized BasicDataSource createDataSource(DataSourceConfig dataSourceConfig) {
+
         if (dataSourceConfig.getClassName() == null) {
             throw new NullPointerException("`className` parameter not configured！");
         }

@@ -7,6 +7,7 @@ import com.bugjc.flink.connector.kafka.test.event.KafkaEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
