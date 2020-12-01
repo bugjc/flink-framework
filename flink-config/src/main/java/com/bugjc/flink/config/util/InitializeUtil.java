@@ -1,6 +1,5 @@
 package com.bugjc.flink.config.util;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.bugjc.flink.config.Config;
 import com.bugjc.flink.config.annotation.Application;
 import com.bugjc.flink.config.annotation.ApplicationTest;
@@ -171,28 +170,6 @@ public class InitializeUtil {
         combineResultMap.putAll(newParameter);
         combineResultMap.putAll(componentConfigProperties);
         return combineResultMap;
-    }
-
-    /**
-     * 对于组件配置的键，默认去除前缀后的值作为键。如用户定义了 @JSONField 注解则使用其 name 字段作为属性的键。
-     *
-     * @param prefix
-     * @param key
-     * @return
-     */
-    private static String parseKey(Class<?> setClass, String prefix, String key) {
-        String fieldName = key.replaceAll(prefix, "");
-        try {
-            Field field = setClass.getDeclaredField(fieldName);
-            JSONField jsonField = field.getAnnotation(JSONField.class);
-            if (jsonField == null) {
-                return fieldName;
-            }
-            fieldName = jsonField.name();
-        } catch (NoSuchFieldException e) {
-            //ignore
-        }
-        return fieldName;
     }
 
     /**

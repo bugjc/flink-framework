@@ -1,14 +1,8 @@
 package com.bugjc.flink.connector.kafka;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.annotation.JSONType;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
 import com.bugjc.flink.connector.kafka.config.AbstractKafkaConsumerConfig;
 import com.bugjc.flink.connector.kafka.schema.GeneralKafkaSchema;
-import com.google.gson.Gson;
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;

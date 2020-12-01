@@ -1,8 +1,9 @@
 package com.bugjc.flink.config.util;
 
-import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.parser.TypeUtil;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import scala.util.parsing.json.JSON;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -121,7 +122,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Character[] val = (Character[]) m.invoke(object);
-                log.info("Character[] {} = {}", field.getName(), JSON.toJSONString(val));
+                log.info("Character[] {} = {}", field.getName(), new Gson().toJson(val));
             }
 
             // 如果类型是 String[]
@@ -129,7 +130,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 String[] val = (String[]) m.invoke(object);
-                log.info("String[] {} = {}", field.getName(), JSON.toJSONString(val));
+                log.info("String[] {} = {}", field.getName(), new Gson().toJson(val));
             }
 
             // 如果类型是 List
@@ -137,7 +138,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 List val = (List) m.invoke(object);
-                log.info("List {} = {}", field.getName(), JSON.toJSONString(val));
+                log.info("List {} = {}", field.getName(), new Gson().toJson(val));
             }
 
             // 如果类型是 Map
@@ -145,7 +146,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Map val = (Map) m.invoke(object);
-                log.info("Map {} = {}", field.getName(), JSON.toJSONString(val));
+                log.info("Map {} = {}", field.getName(), new Gson().toJson(val));
             }
 
             // 如果类型是 Enum
@@ -153,7 +154,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Enum val = (Enum) m.invoke(object);
-                log.info("Enum {} = {}", field.getName(), JSON.toJSONString(val));
+                log.info("Enum {} = {}", field.getName(), new Gson().toJson(val));
             }
 
         }

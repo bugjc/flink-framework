@@ -23,7 +23,6 @@
         <flink.version>1.10.0</flink.version>
         <scala.binary.version>2.11</scala.binary.version>
         <!--运行依赖软件库-->
-        <fastjson.version>1.2.70</fastjson.version>
         <hutool-all.version>5.3.7</hutool-all.version>
         <lombok.version>1.18.12</lombok.version>
 

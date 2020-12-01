@@ -4,12 +4,19 @@ import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.annotation.Application;
 import com.bugjc.flink.connector.kafka.KafkaConsumerConfig;
 import com.bugjc.flink.connector.kafka.KafkaProducerConfig;
+import com.bugjc.flink.test.kafka.app.config.KafkaProducerConfig2;
 import com.bugjc.flink.test.kafka.app.model.KafkaEvent;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+
+import java.util.concurrent.Future;
 
 /**
  * 程序入口
@@ -45,7 +52,8 @@ public class KafkaConsumerApplication {
 
 
         //4. sink kafka
-        KafkaProducerConfig kafkaProducerConfig = environmentConfig.getComponent(KafkaProducerConfig.class);
+        //TODO 多个生产者消费者配置解析问题
+        KafkaProducerConfig2 kafkaProducerConfig = environmentConfig.getComponent(KafkaProducerConfig2.class);
         FlinkKafkaProducer011<KafkaEvent> producer011 = kafkaProducerConfig.createKafkaSink(KafkaEvent.class);
         kafkaEventSource.addSink(producer011);
 

@@ -1,9 +1,9 @@
 package com.bugjc.flink.connector.jdbc.test;
 
-import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.connector.jdbc.DataSourceConfig;
 import com.bugjc.flink.connector.jdbc.test.entity.JobEntity;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.shaded.guava18.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -40,11 +40,12 @@ class DataSourceConfigTest {
 
     @Test
     void getDataSourceConfig() {
+        Gson gson = new Gson();
         DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class);
         log.info("getDataSourceConfigFactory：{}", dataSourceConfig.getDataSource());
-        String dataSourceConfigJson = JSON.toJSONString(dataSourceConfig);
+        String dataSourceConfigJson = gson.toJson(dataSourceConfig);
         log.info("DataSource 配置信息：{}", dataSourceConfigJson);
-        dataSourceConfig = JSON.parseObject(dataSourceConfigJson, DataSourceConfig.class);
+        dataSourceConfig = gson.fromJson(dataSourceConfigJson, DataSourceConfig.class);
         log.info("getDataSourceConfigFactory：{}", dataSourceConfig.getDataSource());
     }
 
