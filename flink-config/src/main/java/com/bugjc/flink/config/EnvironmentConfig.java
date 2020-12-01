@@ -1,6 +1,5 @@
 package com.bugjc.flink.config;
 
-import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.util.InitializeUtil;
 import com.bugjc.flink.config.util.StopWatch;
 import com.esotericsoftware.minlog.Log;
@@ -91,7 +90,7 @@ public class EnvironmentConfig implements Serializable {
      * @return
      */
     public Properties getComponentProperties(Class<?> c) {
-        return JSON.parseObject(this.parameterTool.get(c.getName()), Properties.class);
+        return new Gson().fromJson(this.parameterTool.get(c.getName()), Properties.class);
     }
 
     /**

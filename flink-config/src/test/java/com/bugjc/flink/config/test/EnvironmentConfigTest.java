@@ -1,16 +1,17 @@
 package com.bugjc.flink.config.test;
 
 
-import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.test.component.DataSourceConfig;
 import com.bugjc.flink.config.test.component.KafkaConsumerConfig;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import scala.util.parsing.json.JSON;
 
 import java.util.Properties;
 import java.util.Random;
@@ -68,13 +69,13 @@ class EnvironmentConfigTest {
     void getComponentProperties() {
         //获取 kafka 配置
         Properties kafkaProperties = environmentConfig.getComponentProperties(KafkaConsumerConfig.class);
-        log.info("Kafka 配置信息：{}", JSON.toJSONString(kafkaProperties));
+        log.info("Kafka 配置信息：{}", new Gson().toJson(kafkaProperties));
     }
 
     @Test
     void getComponent() {
         DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class);
-        log.info("DataSource 配置信息：{}", JSON.toJSONString(dataSourceConfig));
+        log.info("DataSource 配置信息：{}", new Gson().toJson(dataSourceConfig));
     }
 
 //    @Test

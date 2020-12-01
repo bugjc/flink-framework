@@ -1,6 +1,5 @@
 package com.bugjc.flink.test.config.app;
 
-import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.annotation.Application;
 import com.bugjc.flink.config.util.ClassUtil;
@@ -8,6 +7,7 @@ import com.bugjc.flink.connector.jdbc.DataSourceConfig;
 import com.bugjc.flink.connector.kafka.KafkaConsumerConfig;
 import com.bugjc.flink.connector.kafka.KafkaProducerConfig;
 import com.bugjc.flink.test.config.app.config.ParamConfig;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.ExecutionMode;
@@ -48,7 +48,7 @@ public class ConfigApplication {
 
         //4.测试组件参数自动配置
         ParamConfig paramConfig = environmentConfig.getComponent(ParamConfig.class);
-        log.info("Result = {}", JSON.toJSONString(paramConfig));
+        log.info("Result = {}", new Gson().toJson(paramConfig));
         ClassUtil.print(paramConfig);
 
     }

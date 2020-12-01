@@ -1,6 +1,5 @@
 package com.bugjc.flink.connector.kafka.schema;
 
-import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SerializationSchema;
@@ -17,14 +16,15 @@ import java.io.IOException;
 public class GeneralKafkaSchema<T> implements DeserializationSchema<T>, SerializationSchema<T> {
 
     private final Class<T> entityClass;
+    private static Gson gson = new Gson();
 
     public GeneralKafkaSchema(Class<T> entityClass) {
         this.entityClass = entityClass;
     }
-    
+
     @Override
     public T deserialize(byte[] message) throws IOException {
-        return JSON.parseObject(message, entityClass);
+        return new Gson().fromJson(new String(message), entityClass);
     }
 
     @Override
@@ -33,8 +33,8 @@ public class GeneralKafkaSchema<T> implements DeserializationSchema<T>, Serializ
     }
 
     @Override
-    public byte[] serialize(T element) {
-        return JSON.toJSONBytes(element);
+    public byte[] serialize(T message) {
+        return gson.toJson(message).getBytes();
     }
 
     @Override

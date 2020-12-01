@@ -203,6 +203,11 @@ public class CustomConfig implements Config, Serializable {
     //TODO 这里写定制连接器创建连接对象方法
 }
 ```
+
+##### 注意事项
+- 属性字段类型是 JavaBean 的则字段名必须是 `Entity` 结尾，如：private Email emailEntity;
+- 属性字段类型是 Enum 的则字段名必须是 `Enum` 结尾，如：private enum emailEnum;
+
 注意事项:  
 - 配置入口类要能够序列化
 

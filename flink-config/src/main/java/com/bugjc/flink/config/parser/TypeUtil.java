@@ -1,10 +1,5 @@
 package com.bugjc.flink.config.parser;
 
-import com.alibaba.fastjson.parser.ParserConfig;
-import com.alibaba.fastjson.parser.deserializer.EnumDeserializer;
-import com.alibaba.fastjson.parser.deserializer.JavaBeanDeserializer;
-import com.alibaba.fastjson.parser.deserializer.MapDeserializer;
-import com.alibaba.fastjson.serializer.CollectionCodec;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -18,23 +13,19 @@ import java.lang.reflect.Type;
 public class TypeUtil {
 
     public static boolean isJavaBean(Type type) {
-        if (null == type) {
-            throw new NullPointerException();
-        }
-        // 根据 getDeserializer 返回值类型判断是否为 java bean 类型
-        return ParserConfig.global.getDeserializer(type) instanceof JavaBeanDeserializer;
+        return type.getTypeName().endsWith("Entity") || type.getTypeName().endsWith("JavaBean");
     }
 
     public static boolean isEnum(Type type) {
-        return ParserConfig.global.getDeserializer(type) instanceof EnumDeserializer;
+        return type.getTypeName().endsWith("Enum");
     }
 
     public static boolean isList(Type type) {
-        return ParserConfig.global.getDeserializer(type) instanceof CollectionCodec;
+        return type.getTypeName().startsWith("java.util.List") || type.getTypeName().startsWith("java.util.ArrayList");
     }
 
     public static boolean isMap(Type type) {
-        return ParserConfig.global.getDeserializer(type) instanceof MapDeserializer;
+        return type.getTypeName().startsWith("java.util.Map") || type.getTypeName().startsWith("java.util.HashMap");
     }
 
     public static boolean isBasic(Type type) {

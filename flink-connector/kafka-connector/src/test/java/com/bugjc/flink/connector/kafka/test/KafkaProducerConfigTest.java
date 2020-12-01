@@ -1,16 +1,12 @@
 package com.bugjc.flink.connector.kafka.test;
 
-import com.alibaba.fastjson.JSON;
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.annotation.ApplicationTest;
-import com.bugjc.flink.connector.kafka.KafkaConsumerConfig;
 import com.bugjc.flink.connector.kafka.KafkaProducerConfig;
 import com.bugjc.flink.connector.kafka.test.event.KafkaEvent;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -47,7 +43,7 @@ class KafkaProducerConfigTest {
         for (int i = 0; i < 100; i++) {
             //同步发送
             KafkaEvent kafkaEvent = new KafkaEvent("aoki" + i, i, System.currentTimeMillis());
-            String message = JSON.toJSONString(kafkaEvent);
+            String message = new Gson().toJson(kafkaEvent);
             ProducerRecord<String, String> record = kafkaProducerConfig.createKafkaProducerRecord(message);
             Future<RecordMetadata> recordMetadataFuture = producer.send(record);
             RecordMetadata recordMetadata = recordMetadataFuture.get();
