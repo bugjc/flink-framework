@@ -21,7 +21,7 @@ public class PropertyParser {
     /**
      * 注册类型处理器
      */
-    private static Map<ContainerType, NewFieldHandler> REGISTER_TYPE_HANDLER = new HashMap<ContainerType, NewFieldHandler>() {{
+    private static final Map<ContainerType, NewFieldHandler> REGISTER_TYPE_HANDLER = new HashMap<ContainerType, NewFieldHandler>() {{
         put(ContainerType.Basic, BasicTypeNewFieldHandler.INSTANCE);
         put(ContainerType.ArrayList, ArrayListTypeNewFieldHandler.INSTANCE);
         put(ContainerType.Virtual_ArrayList, VirtualArrayListTypeNewFieldHandler.INSTANCE);

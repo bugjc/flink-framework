@@ -21,7 +21,6 @@ import org.reflections.Reflections;
 import org.reflections.ReflectionsException;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -91,7 +90,7 @@ public class InitializeUtil {
         //注解方式
         Set<Class<?>> setClasses = new HashSet<>();
         for (Class<?> setClass : allSetClasses) {
-            if (!existExcludeClass(setClass, excludeList)) {
+            if (existExcludeClass(setClass, excludeList)) {
                 setClasses.add(setClass);
             }
         }
@@ -99,7 +98,7 @@ public class InitializeUtil {
         //接口方式
         ServiceLoader<Config> serviceLoader = ServiceLoader.load(Config.class);
         for (Config config : serviceLoader) {
-            if (!existExcludeClass(config.getClass(), excludeList)) {
+            if (existExcludeClass(config.getClass(), excludeList)) {
                 setClasses.add(config.getClass());
             }
         }
@@ -116,14 +115,14 @@ public class InitializeUtil {
      */
     private static boolean existExcludeClass(Class<?> c, List<Class<?>> excludeList) {
         if (excludeList == null) {
-            return false;
+            return true;
         }
         for (Class<?> aClass : excludeList) {
             if (c.equals(aClass)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     /**

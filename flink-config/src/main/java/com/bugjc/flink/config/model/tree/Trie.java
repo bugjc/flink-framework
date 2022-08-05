@@ -12,7 +12,7 @@ public class Trie {
     /**
      * 前缀树
      */
-    private static TrieNode root = new TrieNode("/");
+    private static final TrieNode root = new TrieNode("/");
 
     /**
      * 构建一个 Trie 树
