@@ -8,8 +8,10 @@ import com.bugjc.flink.test.mysql.app.model.KafkaEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.ExecutionMode;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.shaded.guava18.com.google.common.collect.Lists;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.shaded.curator5.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -17,7 +19,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.util.Collector;
 
 import java.util.ArrayList;
@@ -67,14 +68,12 @@ public class SinkMySqlApplication {
         env.getCheckpointConfig().setMaxConcurrentCheckpoints(1);
         // 开启在 job 中止后仍然保留的 externalized checkpoints
         env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        // 允许在有更近 savepoint 时回退到 checkpoint
-        env.getCheckpointConfig().setPreferCheckpointForRecovery(true);
 
         //2.获取 kafka 消费者配置
         KafkaConsumerConfig kafkaConsumerConfig = environmentConfig.getComponent(KafkaConsumerConfig.class);
-        FlinkKafkaConsumer011<KafkaEvent> consumer011 = kafkaConsumerConfig.createKafkaSource(KafkaEvent.class);
+        KafkaSource<KafkaEvent> consumer011 = kafkaConsumerConfig.createKafkaSource(KafkaEvent.class);
         SingleOutputStreamOperator<KafkaEvent> kafkaEventSource = env
-                .addSource(consumer011)
+                .fromSource(consumer011, WatermarkStrategy.noWatermarks(),"Kafka Source")
                 .setParallelism(2);
 
         //3.按时间窗口汇集数据

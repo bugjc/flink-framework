@@ -6,10 +6,11 @@ import com.bugjc.flink.connector.kafka.schema.GeneralKafkaSchema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -59,21 +60,28 @@ public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements 
     }
 
     @Override
-    public <T> FlinkKafkaConsumer011<T> createKafkaSource(Class<T> eventClass) {
+    public <T> KafkaSource<T> createKafkaSource(Class<T> eventClass) {
         Pattern pattern = Pattern.compile(this.topic);
         if (pattern.matcher(pattern.pattern()).matches()) {
-            //使用 单topic 或 多topic
-            return new FlinkKafkaConsumer011<T>(
-                    Arrays.stream(this.topic.split(",")).map(String::trim).collect(Collectors.toList()),
-                    this.createGeneralKafkaSchema(eventClass),
-                    this.getProperties());
+            List<String> topics = Arrays.stream(this.topic.split(",")).map(String::trim).collect(Collectors.toList());
+            return KafkaSource.<T>builder()
+                    .setBootstrapServers(this.bootstrapServers)
+                    .setTopics(topics)
+                    .setGroupId(this.groupId)
+                    //.setStartingOffsets(OffsetsInitializer.earliest())
+                    .setProperties(this.getProperties())
+                    .setValueOnlyDeserializer(this.createGeneralKafkaSchema(eventClass))
+                    .build();
         }
 
         //使用 Topic 发现
-        return new FlinkKafkaConsumer011<T>(
-                pattern,
-                this.createGeneralKafkaSchema(eventClass),
-                this.getProperties());
-
+        return KafkaSource.<T>builder()
+                .setBootstrapServers(this.bootstrapServers)
+                .setTopicPattern(pattern)
+                .setGroupId(this.groupId)
+                //.setStartingOffsets(OffsetsInitializer.earliest())
+                .setProperties(this.getProperties())
+                .setValueOnlyDeserializer(this.createGeneralKafkaSchema(eventClass))
+                .build();
     }
 }

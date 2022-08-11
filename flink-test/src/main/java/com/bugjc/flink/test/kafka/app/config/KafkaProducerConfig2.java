@@ -6,7 +6,9 @@ import com.bugjc.flink.connector.kafka.schema.GeneralKafkaSchema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
+import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
@@ -45,11 +47,16 @@ public class KafkaProducerConfig2 extends AbstractKafkaProducerConfig implements
     }
 
     @Override
-    public <T> FlinkKafkaProducer011<T> createKafkaSink(Class<T> eventClass) {
-        return new FlinkKafkaProducer011<T>(
-                this.topic,
-                this.createGeneralKafkaSchema(eventClass),
-                this.getProperties());
+    public <T> KafkaSink<T> createKafkaSink(Class<T> eventClass) {
+        return KafkaSink.<T>builder()
+                .setKafkaProducerConfig(this.getProperties())
+                .setRecordSerializer(KafkaRecordSerializationSchema.builder()
+                        .setTopic(this.topic)
+                        .setValueSerializationSchema(this.createGeneralKafkaSchema(eventClass))
+                        .build()
+                )
+                .setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .build();
     }
 
     @Override

@@ -5,10 +5,10 @@ import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.connector.kafka.KafkaConsumerConfig;
 import com.bugjc.flink.connector.kafka.test.event.KafkaEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -35,11 +35,11 @@ class KafkaConsumerConfigTest {
         StreamExecutionEnvironment env = environmentConfig.getStreamExecutionEnvironment();
         KafkaConsumerConfig kafkaConsumerConfig = environmentConfig.getComponent(KafkaConsumerConfig.class);
         log.info("KafkaConsumerConfig 配置信息：{}", kafkaConsumerConfig);
-        FlinkKafkaConsumer011<KafkaEvent> consumer011 = kafkaConsumerConfig.createKafkaSource(KafkaEvent.class);
+        KafkaSource<KafkaEvent> consumer011 = kafkaConsumerConfig.createKafkaSource(KafkaEvent.class);
         log.info("{}", consumer011);
 
         SingleOutputStreamOperator<KafkaEvent> kafkaEventSource = env
-                .addSource(consumer011)
+                .fromSource(consumer011, WatermarkStrategy.noWatermarks(),"Kafka Source")
                 .setParallelism(2);
 
         kafkaEventSource.print();

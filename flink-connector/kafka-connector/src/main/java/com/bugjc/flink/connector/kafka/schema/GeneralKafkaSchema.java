@@ -6,8 +6,6 @@ import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 
-import java.io.IOException;
-
 /**
  * 自定义 Kafka连接 序列怀器（org.apache.flink.api）
  *
@@ -24,7 +22,7 @@ public class GeneralKafkaSchema<T> implements DeserializationSchema<T>, Serializ
     }
 
     @Override
-    public T deserialize(byte[] message) throws IOException {
+    public T deserialize(byte[] message) {
         return  new GsonBuilder().disableHtmlEscaping().create().fromJson(new String(message), entityClass);
     }
 

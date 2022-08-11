@@ -8,8 +8,8 @@ import com.google.gson.GsonBuilder;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import scala.Serializable;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;

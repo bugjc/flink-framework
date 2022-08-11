@@ -2,7 +2,7 @@ package com.bugjc.flink.connector.kafka.config;
 
 import com.bugjc.flink.config.Config;
 import com.bugjc.flink.connector.kafka.schema.GeneralKafkaSchema;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
@@ -37,7 +37,7 @@ public abstract class AbstractKafkaProducerConfig implements Config {
      * @param <T>        --实体对象泛型类型
      * @return
      */
-    public abstract <T> FlinkKafkaProducer011<T> createKafkaSink(Class<T> eventClass);
+    public abstract <T> KafkaSink<T> createKafkaSink(Class<T> eventClass);
 
     /**
      * 创建一个 kafka KafkaProducer

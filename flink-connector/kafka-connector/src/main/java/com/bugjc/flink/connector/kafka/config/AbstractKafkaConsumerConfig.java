@@ -2,7 +2,7 @@ package com.bugjc.flink.connector.kafka.config;
 
 import com.bugjc.flink.config.Config;
 import com.bugjc.flink.connector.kafka.schema.GeneralKafkaSchema;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 
 import java.util.Properties;
 
@@ -35,5 +35,5 @@ public abstract class AbstractKafkaConsumerConfig implements Config {
      * @param <T>        --实体对象泛型类型
      * @return FlinkKafkaConsumer011<T>
      */
-    public abstract <T> FlinkKafkaConsumer011<T> createKafkaSource(Class<T> eventClass);
+    public abstract <T> KafkaSource<T> createKafkaSource(Class<T> eventClass);
 }
