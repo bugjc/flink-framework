@@ -32,7 +32,7 @@ public class DruidDataSource implements BasicDataSource {
     }
 
     @Override
-    public void close() throws SQLException {
+    public void close() {
         this.dataSource.close();
     }
 }

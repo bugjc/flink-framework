@@ -17,7 +17,7 @@ public class Trie {
     /**
      * 构建一个 Trie 树
      *
-     * @param key
+     * @param key   --属性字段
      */
     public static void insert(String key) {
         //构建
@@ -50,8 +50,8 @@ public class Trie {
     /**
      * 根据前缀查找其所有子节点
      *
-     * @param prefix
-     * @return
+     * @param prefix    --属性字段前缀
+     * @return TrieNode
      */
     public static TrieNode find(String prefix) {
         //prefix = PointToCamelUtil.camel2Point(prefix);

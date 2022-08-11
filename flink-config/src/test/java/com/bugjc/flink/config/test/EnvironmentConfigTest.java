@@ -2,21 +2,22 @@ package com.bugjc.flink.config.test;
 
 
 import com.bugjc.flink.config.EnvironmentConfig;
+import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.config.test.component.DataSourceConfig;
 import com.bugjc.flink.config.test.component.KafkaConsumerConfig;
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import scala.util.parsing.json.JSON;
 
 import java.util.Properties;
 import java.util.Random;
 
 @Slf4j
+@ApplicationTest
 class EnvironmentConfigTest {
 
     /**
@@ -25,7 +26,7 @@ class EnvironmentConfigTest {
     private static EnvironmentConfig environmentConfig;
 
     @BeforeAll
-    static void init() {
+    static void setup() {
         try {
             environmentConfig = new EnvironmentConfig(new String[]{});
         } catch (Exception exception) {
@@ -66,27 +67,15 @@ class EnvironmentConfigTest {
     }
 
     @Test
-    void getComponentProperties() {
+    void getKafkaConsumerConfig() {
         //获取 kafka 配置
         Properties kafkaProperties = environmentConfig.getComponentProperties(KafkaConsumerConfig.class);
-        log.info("Kafka 配置信息：{}", new Gson().toJson(kafkaProperties));
+        log.info("Kafka 配置信息：{}",  new GsonBuilder().disableHtmlEscaping().create().toJson(kafkaProperties));
     }
 
     @Test
-    void getComponent() {
+    void getDataSourceConfig() {
         DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class);
-        log.info("DataSource 配置信息：{}", new Gson().toJson(dataSourceConfig));
+        log.info("DataSource 配置信息：{}",  new GsonBuilder().disableHtmlEscaping().create().toJson(dataSourceConfig));
     }
-
-//    @Test
-//    void get() {
-//        log.info("application name：{}", environmentConfig.getParameterTool().get("flink.application.name"));
-//    }
-//
-//    @Test
-//    void getParameterTool() {
-//        ParameterTool parameterTool = environmentConfig.getParameterTool();
-//        boolean flag = parameterTool.has("flink.application.name");
-//        log.info("ParameterTool 配置文件 {} `flink.application.name` 属性", flag ? "存在" : "不存在");
-//    }
 }

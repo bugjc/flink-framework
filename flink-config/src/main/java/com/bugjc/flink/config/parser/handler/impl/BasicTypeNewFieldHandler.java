@@ -30,9 +30,9 @@ public class BasicTypeNewFieldHandler implements NewFieldHandler {
     /**
      * 获取 Value
      *
-     * @param originalData
-     * @param key
-     * @return
+     * @param originalData --原数据键值对
+     * @param key          --当前分组名（全局唯一）
+     * @return 属性字段值
      */
     private static String getValue(Map<String, String> originalData, String key) {
         String value = originalData.get(key);

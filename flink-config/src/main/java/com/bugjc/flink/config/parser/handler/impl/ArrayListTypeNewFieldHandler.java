@@ -1,13 +1,10 @@
 package com.bugjc.flink.config.parser.handler.impl;
 
-import com.bugjc.flink.config.model.tree.TrieNode;
 import com.bugjc.flink.config.parser.*;
 import com.bugjc.flink.config.parser.handler.NewFieldHandler;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.bugjc.flink.config.parser.PropertyParser.deconstruction;
 

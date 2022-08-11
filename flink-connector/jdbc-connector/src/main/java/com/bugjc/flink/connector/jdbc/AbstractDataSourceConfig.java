@@ -18,13 +18,13 @@ public abstract class AbstractDataSourceConfig implements Config {
 
     /**
      * 获取数据源对象
-     * @return
+     * @return  BasicDataSource
      */
     public abstract BasicDataSource getDataSource();
 
     /**
      * 获取连接对象
-     * @return
+     * @return Connection
      * @throws SQLException
      */
     public abstract Connection getConnection() throws SQLException;

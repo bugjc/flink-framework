@@ -43,8 +43,8 @@ public class TypeUtil {
     /**
      * 获取泛型的最后一个类型
      *
-     * @param valueType
-     * @return
+     * @param valueType     --字段值类型
+     * @return  返回泛型的最后一个类型
      */
     public static Type getLastType(Type valueType) {
         if (TypeUtil.isMap(valueType) || TypeUtil.isList(valueType)) {

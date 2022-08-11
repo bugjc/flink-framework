@@ -14,8 +14,8 @@ public interface NewFieldHandler {
     /**
      * 处理函数
      *
-     * @param input
-     * @param output
+     * @param input     --输入参数对象
+     * @param output    --输出数据对象
      */
     void process(Params input, Container output);
 }

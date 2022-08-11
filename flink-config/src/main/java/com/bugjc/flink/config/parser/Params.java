@@ -54,9 +54,9 @@ public class Params {
     /**
      * 初始化参数对象
      *
-     * @param upperGroupContainer
-     * @param fields
-     * @param originalData
+     * @param upperGroupContainer   --上级分组容器
+     * @param fields                --要处理的字段列表
+     * @param originalData          --原数据键值对
      */
     public Params(GroupContainer upperGroupContainer, List<NewField> fields, Map<String, String> originalData) {
         this.upperGroupContainer = upperGroupContainer;
@@ -67,10 +67,10 @@ public class Params {
     /**
      * 创建新的参数对象
      *
-     * @param groupContainer
-     * @param fields
-     * @param originalData
-     * @return
+     * @param groupContainer        --分组容器
+     * @param fields                --要处理的字段列表
+     * @param originalData          --原数据键值对
+     * @return  参数对象
      */
     public static Params create(GroupContainer groupContainer, List<NewField> fields, Map<String, String> originalData) {
         return new Params(groupContainer, fields, originalData);
@@ -79,10 +79,10 @@ public class Params {
 
     /**
      * 获取要处理的基础类型字段列表
-     * @param keyType
-     * @param valueType
-     * @param containerType
-     * @return
+     * @param keyType               --属性字段类型
+     * @param valueType             --属性字段值类型
+     * @param containerType         --容器类型
+     * @return  要处理的字段列表
      */
     public List<NewField> getFields(Class<?> keyType, Type valueType, ContainerType containerType) {
         List<NewField> valueFields = new ArrayList<>();
@@ -97,8 +97,8 @@ public class Params {
     /**
      * 获取要处理的 entity 字段列表
      *
-     * @param valueType
-     * @return
+     * @param valueType             --属性字段值类型（Class entity）
+     * @return  要处理的字段列表
      */
     public List<NewField> getEntityFields(Type valueType) {
         Class<?> entityClass = (Class<?>) valueType;

@@ -1,6 +1,7 @@
 package com.bugjc.flink.connector.kafka.schema;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -16,7 +17,7 @@ import java.io.IOException;
 public class GeneralKafkaSchema<T> implements DeserializationSchema<T>, SerializationSchema<T> {
 
     private final Class<T> entityClass;
-    private static Gson gson = new Gson();
+    private static final Gson gson =  new GsonBuilder().disableHtmlEscaping().create();
 
     public GeneralKafkaSchema(Class<T> entityClass) {
         this.entityClass = entityClass;
@@ -24,7 +25,7 @@ public class GeneralKafkaSchema<T> implements DeserializationSchema<T>, Serializ
 
     @Override
     public T deserialize(byte[] message) throws IOException {
-        return new Gson().fromJson(new String(message), entityClass);
+        return  new GsonBuilder().disableHtmlEscaping().create().fromJson(new String(message), entityClass);
     }
 
     @Override

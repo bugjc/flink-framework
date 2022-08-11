@@ -19,7 +19,7 @@ public @interface ConfigurationProperties {
      * 示例：prefix = `flink.kafka.consumer.` 属性值 flink.kafka.consumer.bootstrap.servers=192.168.0.103:9092
      * 会替换成 consumer.bootstrap.servers=192.168.0.103:9092
      *
-     * @return
+     * @return 去掉指定前缀的字段配置
      */
     String prefix();
 }

@@ -12,11 +12,11 @@ import java.util.Collection;
  * @author aoki
  * @date 2020/9/1
  **/
-public class CollectionNewFieldValueConverter implements NewFieldValueConverter<Collection> {
+public class CollectionNewFieldValueConverter implements NewFieldValueConverter<Collection<String>> {
     public final static CollectionNewFieldValueConverter INSTANCE = new CollectionNewFieldValueConverter();
 
     @Override
-    public Collection transform(String value) {
+    public Collection<String> transform(String value) {
         if (StringUtils.isBlank(value)) {
             return null;
         }

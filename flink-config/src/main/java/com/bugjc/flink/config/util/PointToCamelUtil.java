@@ -10,8 +10,8 @@ import java.util.regex.Pattern;
  * **/
 public class PointToCamelUtil {
 
-    private static Pattern POINT2CAMEL = Pattern.compile("([A-Za-z\\d]+)(.)?");
-    private static Pattern CAMEL2POINT = Pattern.compile("[A-Z]");
+    private static final Pattern POINT2CAMEL = Pattern.compile("([A-Za-z\\d]+)(.)?");
+    private static final Pattern CAMEL2POINT = Pattern.compile("[A-Z]");
 
     /**
      * 点转驼峰法

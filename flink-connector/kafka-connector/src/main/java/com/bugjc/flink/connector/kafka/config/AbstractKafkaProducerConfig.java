@@ -9,11 +9,9 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import java.util.Properties;
 
 /**
- * 类描述
- *
+ * Kafka 抽象生产者配置
  * @author aoki
  * @date 2020/7/14
- * @see <a href="">https://leetcode-cn.com</a>
  **/
 public abstract class AbstractKafkaProducerConfig implements Config {
     /**

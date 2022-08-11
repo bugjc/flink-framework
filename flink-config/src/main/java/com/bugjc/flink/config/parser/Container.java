@@ -71,7 +71,7 @@ public class Container {
     /**
      * 添加存储数据的容器
      *
-     * @param groupContainer
+     * @param groupContainer --当前分组容器
      */
     public void putContainer(GroupContainer groupContainer) {
         //创建并关联容器
@@ -115,8 +115,8 @@ public class Container {
     /**
      * 创建容器的对象引用
      *
-     * @param groupContainer
-     * @return
+     * @param groupContainer --当前分组容器
+     * @return 返回当前分组容器的引用
      */
     private Object createContainerObject(GroupContainer groupContainer) {
         ContainerType currentContainerType = groupContainer.getCurrentContainerType();
@@ -155,10 +155,9 @@ public class Container {
 
     /**
      * 选择当前容器插入数据
-     *
-     * @param fieldName
-     * @param type
-     * @param value
+     * @param fieldName     --字段名
+     * @param type          --字段类型
+     * @param value         --字段值
      */
     public void putContainerValue(String fieldName, Type type, String value) {
         Object object = this.getContainer(currentGroupContainer);
@@ -170,14 +169,15 @@ public class Container {
     }
 
     /**
-     * @param object
-     * @param fieldName
-     * @param type
-     * @param value
+     * 插入数据到指定的容器中
+     * @param object        --容器引用
+     * @param fieldName     --字段名
+     * @param type          --字段类型
+     * @param value         --字段值
      */
     private void putContainerValue(Object object, String fieldName, Type type, String value) {
         if (object instanceof List) {
-            List<Object> list = ((List) object);
+            List<Object> list = ((List<Object>) object);
             list.addAll((Collection) Objects.requireNonNull(NewFieldValueConverterUtil.getNewFieldValue(type, value)));
         } else {
             Map<String, Object> map = ((Map<String, Object>) object);

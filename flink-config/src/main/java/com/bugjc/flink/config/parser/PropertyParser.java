@@ -36,8 +36,8 @@ public class PropertyParser {
     /**
      * 解构对象字段数据
      *
-     * @param input
-     * @param output
+     * @param input  --输入参数对象
+     * @param output --输出容器对象
      */
     public static void deconstruction(Params input, Container output) {
 
@@ -75,10 +75,10 @@ public class PropertyParser {
     }
 
     /**
-     * 获取分组名
+     * 获取唯一分组名
      *
-     * @param params
-     * @return
+     * @param params   组名组成的基本元素
+     * @return 全局唯一的分组名
      */
     private static String getGroupName(String... params) {
         StringBuilder sb = new StringBuilder();

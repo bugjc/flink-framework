@@ -69,8 +69,8 @@ public class DataSourceConfigFactory {
      * 获取指定配置文件的一个数据源连接对象
      *
      * @param dataSourceConfig --数据源配置
-     * @return
-     * @throws SQLException
+     * @return  连接对象
+     * @throws SQLException     异常
      */
     public static Connection getConnection(DataSourceConfig dataSourceConfig) throws SQLException {
         BasicDataSource dataSource = DATA_SOURCE_MAP.get(dataSourceConfig.getClassName());

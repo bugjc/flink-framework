@@ -4,6 +4,7 @@ import com.bugjc.flink.config.util.InitializeUtil;
 import com.bugjc.flink.config.util.StopWatch;
 import com.esotericsoftware.minlog.Log;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -30,13 +31,13 @@ public class EnvironmentConfig implements Serializable {
         return this.parameterTool;
     }
 
+    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
+
     /**
      * 构建配置文件
      * 配置优先级：system > Args > env > default
-     *
-     * @param args
-     * @return
-     * @throws Exception
+     * @param args          --自定义参数
+     * @throws Exception    异常
      */
     public EnvironmentConfig(final String[] args) throws Exception {
         String method = Thread.currentThread().getStackTrace()[1].getMethodName();
@@ -62,7 +63,7 @@ public class EnvironmentConfig implements Serializable {
     /**
      * 获取流执行环境
      *
-     * @return
+     * @return StreamExecutionEnvironment
      */
     public StreamExecutionEnvironment getStreamExecutionEnvironment() {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -74,7 +75,7 @@ public class EnvironmentConfig implements Serializable {
     /**
      * 获取批执行环境
      *
-     * @return
+     * @return ExecutionEnvironment
      */
     public ExecutionEnvironment getExecutionEnvironment() {
         final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
@@ -86,23 +87,21 @@ public class EnvironmentConfig implements Serializable {
     /**
      * 获取组件属性集
      *
-     * @param c
-     * @return
+     * @param c     --java bean
+     * @return Properties
      */
     public Properties getComponentProperties(Class<?> c) {
-        return new Gson().fromJson(this.parameterTool.get(c.getName()), Properties.class);
+        return GSON.fromJson(this.parameterTool.get(c.getName()), Properties.class);
     }
 
     /**
      * 获取组件属性配置文件
      *
-     * @param c
-     * @param <T>
-     * @return
+     * @param c     --java bean
+     * @return T
      */
     public <T> T getComponent(Class<T> c) {
-        Gson gson = new Gson();
-        T t = gson.fromJson(this.parameterTool.get(c.getName()), c);
+        T t = GSON.fromJson(this.parameterTool.get(c.getName()), c);
         if (t == null) {
             throw new NullPointerException("this class is not a component!");
         }

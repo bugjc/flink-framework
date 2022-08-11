@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 分组容器
+ * 分组容器，辅助类
  * 不可变对象,用于定位容器存储对象
  *
  * @author aoki
@@ -45,9 +45,9 @@ public class GroupContainer {
     /**
      * 初始化容器
      *
-     * @param currentContainerType
-     * @param currentGroupName
-     * @param upperContainerType
+     * @param currentContainerType --当前容器类型
+     * @param currentGroupName     --当前分组容器名
+     * @param upperContainerType   --上级容器类型
      */
     public GroupContainer(ContainerType currentContainerType, String currentGroupName, ContainerType upperContainerType) {
         if (currentGroupName.endsWith(Constants.SUFFIX)) {
@@ -67,10 +67,11 @@ public class GroupContainer {
 
     /**
      * 创建一个新的容器
-     * @param currentContainerType
-     * @param currentGroupName
-     * @param upperContainerType
-     * @return
+     *
+     * @param currentContainerType --当前容器类型
+     * @param currentGroupName     --当前分组名
+     * @param upperContainerType   --上级容器类型
+     * @return 新的分组容器
      */
     public static GroupContainer create(ContainerType currentContainerType, String currentGroupName, ContainerType upperContainerType){
         return new GroupContainer(currentContainerType, currentGroupName, upperContainerType);

@@ -18,5 +18,5 @@ public class CustomConfig implements Config, Serializable {
     private String property1;
     private String property2;
 
-    //TODO 这里写创建你的连接对象方法
+    //TODO 这里写创建该组件的连接对象的方法
 }

@@ -4,7 +4,7 @@ import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.connector.kafka.KafkaProducerConfig;
 import com.bugjc.flink.connector.kafka.test.event.KafkaEvent;
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -43,7 +43,7 @@ class KafkaProducerConfigTest {
         for (int i = 0; i < 100; i++) {
             //同步发送
             KafkaEvent kafkaEvent = new KafkaEvent("aoki" + i, i, System.currentTimeMillis());
-            String message = new Gson().toJson(kafkaEvent);
+            String message =  new GsonBuilder().disableHtmlEscaping().create().toJson(kafkaEvent);
             ProducerRecord<String, String> record = kafkaProducerConfig.createKafkaProducerRecord(message);
             Future<RecordMetadata> recordMetadataFuture = producer.send(record);
             RecordMetadata recordMetadata = recordMetadataFuture.get();

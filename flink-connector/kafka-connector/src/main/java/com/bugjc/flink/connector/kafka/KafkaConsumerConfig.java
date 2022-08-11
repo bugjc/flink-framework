@@ -39,11 +39,6 @@ public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements 
      */
     private String topic;
 
-    /**
-     * 获取 kafka 参数
-     *
-     * @return
-     */
     @Override
     public Properties getProperties() {
         Properties properties = new Properties();
@@ -58,25 +53,11 @@ public class KafkaConsumerConfig extends AbstractKafkaConsumerConfig implements 
         return properties;
     }
 
-    /**
-     * 获取 kafka 序列化、反序列化器
-     *
-     * @param eventClass
-     * @param <T>
-     * @return
-     */
     @Override
     public <T> GeneralKafkaSchema<T> createGeneralKafkaSchema(Class<T> eventClass) {
         return new GeneralKafkaSchema<T>(eventClass);
     }
 
-    /**
-     * 创建一个 kafka 的 consumer source
-     *
-     * @param eventClass --实体对象
-     * @param <T>        --实体对象泛型类型
-     * @return
-     */
     @Override
     public <T> FlinkKafkaConsumer011<T> createKafkaSource(Class<T> eventClass) {
         Pattern pattern = Pattern.compile(this.topic);

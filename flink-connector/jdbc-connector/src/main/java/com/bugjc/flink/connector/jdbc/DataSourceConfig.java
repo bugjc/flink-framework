@@ -45,7 +45,7 @@ public class DataSourceConfig extends AbstractDataSourceConfig implements Serial
     /**
      * 获取数据源对象
      *
-     * @return
+     * @return  BasicDataSource
      */
     @Override
     public BasicDataSource getDataSource() {
@@ -55,8 +55,8 @@ public class DataSourceConfig extends AbstractDataSourceConfig implements Serial
     /**
      * 获取连接对象
      *
-     * @return
-     * @throws SQLException
+     * @return  Connection
+     * @throws SQLException 异常
      */
     @Override
     public Connection getConnection() throws SQLException {

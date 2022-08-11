@@ -1,9 +1,11 @@
 package com.bugjc.flink.connector.jdbc.test;
 
 import com.bugjc.flink.config.EnvironmentConfig;
+import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.connector.jdbc.DataSourceConfig;
 import com.bugjc.flink.connector.jdbc.test.entity.JobEntity;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.shaded.guava18.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -22,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
+@ApplicationTest
 class DataSourceConfigTest {
     /**
      * 构建环境配置文件对象
@@ -40,7 +43,7 @@ class DataSourceConfigTest {
 
     @Test
     void getDataSourceConfig() {
-        Gson gson = new Gson();
+        Gson gson =  new GsonBuilder().disableHtmlEscaping().create();
         DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class);
         log.info("getDataSourceConfigFactory：{}", dataSourceConfig.getDataSource());
         String dataSourceConfigJson = gson.toJson(dataSourceConfig);

@@ -31,7 +31,7 @@ public enum ContainerType {
      * 获取容器类型
      *
      * @param field --字段
-     * @return
+     * @return  容器类型
      */
     public static ContainerType getType(NewField field) {
 
@@ -61,8 +61,8 @@ public enum ContainerType {
     /**
      * 判断字段类型是否为 Java Bean
      *
-     * @param genericType
-     * @return
+     * @param genericType      --泛型类型
+     * @return  是否为 Java Bean
      */
     private static boolean isJavaBean(Type genericType) {
         boolean isParameterizedType = genericType instanceof ParameterizedType;

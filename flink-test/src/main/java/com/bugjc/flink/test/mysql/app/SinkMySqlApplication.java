@@ -17,7 +17,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.util.Collector;
 
@@ -36,8 +35,8 @@ public class SinkMySqlApplication {
 
     /**
      * 测试流程：先启动当前程序，然后启动 com.bugjc.flink.test.kafka.app.KafkaProducerApplication 程序发送消息
-     * @param args
-     * @throws Exception
+     * @param args  --命令行参数
+     * @throws Exception    异常
      */
     public static void main(String[] args) throws Exception {
 

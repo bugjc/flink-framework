@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class NewFieldValueConverterUtil {
 
 
-    private final static Map<Type, NewFieldValueConverter> REGISTER = new HashMap<Type, NewFieldValueConverter>() {{
+    private final static Map<Type, NewFieldValueConverter<?>> REGISTER = new HashMap<Type, NewFieldValueConverter<?>>() {{
         put(Collection.class, CollectionNewFieldValueConverter.INSTANCE);
         put(List.class, CollectionNewFieldValueConverter.INSTANCE);
         put(ArrayList.class, CollectionNewFieldValueConverter.INSTANCE);
@@ -57,12 +57,12 @@ public class NewFieldValueConverterUtil {
     /**
      * 获取类型转换后的值
      *
-     * @param type
-     * @param value
-     * @return
+     * @param type      --字段类型
+     * @param value     --字段值
+     * @return  转换后的值
      */
     public static Object getNewFieldValue(Type type, String value) {
-        NewFieldValueConverter converter = REGISTER.get(type);
+        NewFieldValueConverter<?> converter = REGISTER.get(type);
         if (converter != null) {
             return converter.transform(value);
         }

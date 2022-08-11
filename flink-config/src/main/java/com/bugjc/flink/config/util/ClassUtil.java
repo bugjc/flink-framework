@@ -2,8 +2,8 @@ package com.bugjc.flink.config.util;
 
 import com.bugjc.flink.config.parser.TypeUtil;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
-import scala.util.parsing.json.JSON;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -23,8 +23,8 @@ public class ClassUtil {
     /**
      * 打印对象的属性值
      *
-     * @param object
-     * @throws Exception
+     * @param object --要打印的对象实例
+     * @throws Exception --异常
      */
     public static void print(Object object) throws Exception {
 
@@ -34,7 +34,7 @@ public class ClassUtil {
         // 获取实体类的所有属性，返回Field数组
         Field[] fields = clz.getDeclaredFields();
 
-
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         for (Field field : fields) {
 
             // 如果类型是 Byte
@@ -122,7 +122,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Character[] val = (Character[]) m.invoke(object);
-                log.info("Character[] {} = {}", field.getName(), new Gson().toJson(val));
+                log.info("Character[] {} = {}", field.getName(), gson.toJson(val));
             }
 
             // 如果类型是 String[]
@@ -130,7 +130,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 String[] val = (String[]) m.invoke(object);
-                log.info("String[] {} = {}", field.getName(), new Gson().toJson(val));
+                log.info("String[] {} = {}", field.getName(), gson.toJson(val));
             }
 
             // 如果类型是 List
@@ -138,7 +138,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 List val = (List) m.invoke(object);
-                log.info("List {} = {}", field.getName(), new Gson().toJson(val));
+                log.info("List {} = {}", field.getName(), gson.toJson(val));
             }
 
             // 如果类型是 Map
@@ -146,7 +146,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Map val = (Map) m.invoke(object);
-                log.info("Map {} = {}", field.getName(), new Gson().toJson(val));
+                log.info("Map {} = {}", field.getName(), gson.toJson(val));
             }
 
             // 如果类型是 Enum
@@ -154,7 +154,7 @@ public class ClassUtil {
                 String method = "get" + getMethodName(field.getName());
                 Method m = object.getClass().getMethod(method);
                 Enum val = (Enum) m.invoke(object);
-                log.info("Enum {} = {}", field.getName(), new Gson().toJson(val));
+                log.info("Enum {} = {}", field.getName(), gson.toJson(val));
             }
 
         }
@@ -163,24 +163,23 @@ public class ClassUtil {
     /**
      * 把一个字符串的第一个字母大写、效率是最高的、
      *
-     * @param fieldName
-     * @return
-     * @throws Exception
+     * @param fieldName     --字段名
+     * @return 第一个字母大写的字段名
      */
-    private static String getMethodName(String fieldName) throws Exception {
+    private static String getMethodName(String fieldName) {
         byte[] items = fieldName.getBytes();
         items[0] = (byte) ((char) items[0] - 'a' + 'A');
         return new String(items);
     }
 
     /**
-     * 判断Field是否是指定的类
+     * 判断 Field 是否是指定的类
      *
-     * @param field
-     * @param targetType
-     * @return
+     * @param field         --字段
+     * @param targetType    --目标类型
+     * @return  是否是指定的类
      */
-    private static boolean isTargetClassType(Field field, Class targetType) {
+    private static boolean isTargetClassType(Field field, Class<?> targetType) {
         return field.getType() == targetType;
     }
 

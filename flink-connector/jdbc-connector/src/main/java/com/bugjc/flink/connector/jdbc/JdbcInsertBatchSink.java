@@ -39,9 +39,9 @@ public class JdbcInsertBatchSink<T> implements SinkFunction<List<T>> {
     /**
      * 每条数据的插入都要调用一次 invoke() 方法
      *
-     * @param values
-     * @param context
-     * @throws Exception
+     * @param values  --待插入的数据
+     * @param context --上下文
+     * @throws Exception 异常
      */
     @Override
     public void invoke(List<T> values, Context context) throws Exception {
@@ -82,7 +82,7 @@ public class JdbcInsertBatchSink<T> implements SinkFunction<List<T>> {
     /**
      * 自动解析 SQL
      *
-     * @param value
+     * @param value     --数据库表实体类
      */
     private void autoDeclareInsertedParameters(PreparedStatement preparedStatement, Insert insert, T value) throws SQLException {
 
@@ -114,7 +114,7 @@ public class JdbcInsertBatchSink<T> implements SinkFunction<List<T>> {
     }
 
     /**
-     * 初识 `Insert` 对象
+     * 初始化 `Insert` 对象
      *
      * @param t --实体对象
      * @return
@@ -132,10 +132,10 @@ public class JdbcInsertBatchSink<T> implements SinkFunction<List<T>> {
 
     /**
      * 生成 SQL 语句
-     *
-     * @author aoki
-     * @date 2020/7/13
-     **/
+     * @param t     --数据库表实体类
+     * @return Insert
+     * @throws JSQLParserException  异常
+     */
     private Insert generateSql(T t) throws JSQLParserException {
         //构建插入 SQL 模板
         Insert insertExpand = (Insert) CCJSqlParserUtil.parse("INSERT INTO Placeholder1 (Placeholder2) values (Placeholder3)");

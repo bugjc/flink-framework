@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-
 /**
  * dbcp2 数据库连接池获取连接对象类
  *

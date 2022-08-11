@@ -4,16 +4,12 @@ import com.bugjc.flink.config.Config;
 import com.bugjc.flink.config.annotation.Application;
 import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.config.annotation.ConfigurationProperties;
-import com.bugjc.flink.config.parser.ContainerType;
 import com.bugjc.flink.config.exception.ApplicationContextException;
 import com.bugjc.flink.config.model.application.ApplicationResponse;
-import com.bugjc.flink.config.parser.GroupContainer;
-import com.bugjc.flink.config.parser.NewField;
-import com.bugjc.flink.config.parser.Params;
-import com.bugjc.flink.config.parser.Container;
 import com.bugjc.flink.config.model.tree.Trie;
-import com.bugjc.flink.config.parser.PropertyParser;
+import com.bugjc.flink.config.parser.*;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -74,7 +70,7 @@ public class InitializeUtil {
         ApplicationResponse applicationResponse = findApplicationPackages();
         Set<String> scanBasePackages = applicationResponse.getScanBasePackages();
         List<Class<?>> excludeList = applicationResponse.getExcludes();
-        if (scanBasePackages.isEmpty()) {
+        if (scanBasePackages == null || scanBasePackages.isEmpty()) {
             throw new ApplicationContextException("启动类缺少 @Application 或 @ApplicationTest 注解");
         }
 
@@ -157,7 +153,7 @@ public class InitializeUtil {
                 Container output = new Container();
                 PropertyParser.deconstruction(input, output);
 
-                String data = new Gson().toJson(output.getData());
+                String data =  new GsonBuilder().disableHtmlEscaping().create().toJson(output.getData());
                 componentConfigProperties.put(setClass.getName(), data);
                 log.info("Auto load component configuration：{}", data);
             }

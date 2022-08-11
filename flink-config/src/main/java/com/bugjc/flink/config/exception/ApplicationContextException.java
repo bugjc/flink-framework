@@ -47,14 +47,4 @@ public class ApplicationContextException extends RuntimeException {
         msg = msgFormat;
     }
 
-    /**
-     * 实例化异常
-     *
-     * @param msgFormat
-     * @return
-     */
-    public ApplicationContextException newInstance(String msgFormat) {
-        return new ApplicationContextException(code, msgFormat);
-    }
-
 }
