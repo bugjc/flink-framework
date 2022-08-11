@@ -1,8 +1,8 @@
 package com.bugjc.flink.test.config.app.config;
 
 
+import com.bugjc.flink.config.util.GsonUtil;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -36,7 +36,7 @@ class TestComponentConfigTest {
             }}));
         }});
 
-        Gson gson =  new GsonBuilder().disableHtmlEscaping().create();
+        Gson gson = GsonUtil.getInstance().getGson();
         String json = gson.toJson(testComponentConfig);
         testComponentConfig = gson.fromJson(json, TestComponentConfig.class);
         Assertions.assertEquals(testComponentConfig.getMap1().get("key3").getEntity3().get("field1").getField1(), "field1.1");

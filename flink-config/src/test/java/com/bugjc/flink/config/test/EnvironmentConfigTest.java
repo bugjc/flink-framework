@@ -5,7 +5,7 @@ import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.annotation.ApplicationTest;
 import com.bugjc.flink.config.test.component.DataSourceConfig;
 import com.bugjc.flink.config.test.component.KafkaConsumerConfig;
-import com.google.gson.GsonBuilder;
+import com.bugjc.flink.config.util.GsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -70,12 +70,12 @@ class EnvironmentConfigTest {
     void getKafkaConsumerConfig() {
         //获取 kafka 配置
         Properties kafkaProperties = environmentConfig.getComponentProperties(KafkaConsumerConfig.class);
-        log.info("Kafka 配置信息：{}",  new GsonBuilder().disableHtmlEscaping().create().toJson(kafkaProperties));
+        log.info("Kafka 配置信息：{}", GsonUtil.getInstance().getGson().toJson(kafkaProperties));
     }
 
     @Test
     void getDataSourceConfig() {
         DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class);
-        log.info("DataSource 配置信息：{}",  new GsonBuilder().disableHtmlEscaping().create().toJson(dataSourceConfig));
+        log.info("DataSource 配置信息：{}", GsonUtil.getInstance().getGson().toJson(dataSourceConfig));
     }
 }

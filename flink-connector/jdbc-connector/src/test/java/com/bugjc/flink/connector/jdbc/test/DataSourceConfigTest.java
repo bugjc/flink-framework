@@ -2,6 +2,7 @@ package com.bugjc.flink.connector.jdbc.test;
 
 import com.bugjc.flink.config.EnvironmentConfig;
 import com.bugjc.flink.config.annotation.ApplicationTest;
+import com.bugjc.flink.config.util.GsonUtil;
 import com.bugjc.flink.connector.jdbc.DataSourceConfig;
 import com.bugjc.flink.connector.jdbc.test.entity.JobEntity;
 import com.google.gson.Gson;
@@ -43,7 +44,7 @@ class DataSourceConfigTest {
 
     @Test
     void getDataSourceConfig() {
-        Gson gson =  new GsonBuilder().disableHtmlEscaping().create();
+        Gson gson = GsonUtil.getInstance().getGson();
         DataSourceConfig dataSourceConfig = environmentConfig.getComponent(DataSourceConfig.class);
         log.info("getDataSourceConfigFactory：{}", dataSourceConfig.getDataSource());
         String dataSourceConfigJson = gson.toJson(dataSourceConfig);

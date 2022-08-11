@@ -8,8 +8,6 @@ import com.bugjc.flink.config.exception.ApplicationContextException;
 import com.bugjc.flink.config.model.application.ApplicationResponse;
 import com.bugjc.flink.config.model.tree.Trie;
 import com.bugjc.flink.config.parser.*;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -105,9 +103,9 @@ public class InitializeUtil {
     /**
      * 判断扫描路径是否在排除自动扫描的列表项中
      *
-     * @param c
-     * @param excludeList
-     * @return
+     * @param c           --已扫描到的所有类
+     * @param excludeList --排除指定类
+     * @return true or false
      */
     private static boolean existExcludeClass(Class<?> c, List<Class<?>> excludeList) {
         if (excludeList == null) {
@@ -124,12 +122,11 @@ public class InitializeUtil {
     /**
      * 解析配置
      *
-     * @param parameterTool
-     * @param setClasses
-     * @return
+     * @param parameterTool --配置参数列表
+     * @param setClasses    --配置实体类列表
+     * @return Map<String, String>
      */
     public static Map<String, String> parseConfig(ParameterTool parameterTool, Set<Class<?>> setClasses) {
-
 
         //统一 key 的风格
         Map<String, String> newParameter = new HashMap<>();
@@ -153,7 +150,7 @@ public class InitializeUtil {
                 Container output = new Container();
                 PropertyParser.deconstruction(input, output);
 
-                String data =  new GsonBuilder().disableHtmlEscaping().create().toJson(output.getData());
+                String data = GsonUtil.getInstance().getGson().toJson(output.getData());
                 componentConfigProperties.put(setClass.getName(), data);
                 log.info("Auto load component configuration：{}", data);
             }

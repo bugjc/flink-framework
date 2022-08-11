@@ -34,7 +34,7 @@ public class ClassUtil {
         // 获取实体类的所有属性，返回Field数组
         Field[] fields = clz.getDeclaredFields();
 
-        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        Gson gson = GsonUtil.getInstance().getGson();
         for (Field field : fields) {
 
             // 如果类型是 Byte

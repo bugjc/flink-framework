@@ -3,6 +3,8 @@ package com.bugjc.flink.config.exception;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.io.Serial;
+
 /**
  * 业务异常基类
  *
@@ -11,8 +13,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ApplicationContextException extends RuntimeException {
-
-    private static final long serialVersionUID = -5875371379845226068L;
 
     /**
      * 异常信息
