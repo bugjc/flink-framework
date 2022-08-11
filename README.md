@@ -28,7 +28,7 @@ flink.profiles.active=dev
 <dependency>
     <groupId>com.bugjc.flink.config</groupId>
     <artifactId>flink-config</artifactId>
-    <version>1.10.0</version>
+    <version>1.15.1</version>
 </dependency>
 ```
 #### Main 方法中初始化环境
@@ -66,7 +66,7 @@ environmentConfig.getParameterTool().get("Key1")
 <dependency>
     <groupId>com.bugjc.flink.connector.jdbc</groupId>
     <artifactId>jdbc-connector</artifactId>
-    <version>1.10.0</version>
+    <version>1.15.1</version>
 </dependency>
 ```
 
@@ -118,7 +118,7 @@ public class JobEntity implements Serializable {
 <dependency>
     <groupId>com.bugjc.flink.connector.kafka</groupId>
     <artifactId>kafka-connector</artifactId>
-    <version>1.10.0</version>
+    <version>1.15.1</version>
 </dependency>
 ```
 
@@ -174,16 +174,16 @@ FlinkKafkaProducer011<KafkaEvent> producer011 = kafkaProducerConfig.createKafkaS
 <dependency>
     <groupId>com.bugjc.flink.config</groupId>
     <artifactId>flink-config</artifactId>
-    <version>1.10.0</version>
+    <version>1.15.1</version>
 </dependency>
 ```
 
 #### 2. 定义连接器属性
 ```
-# 自定义组件配置:off
+# 自定义组件配置
 custom.property1=value1
 custom.property2=value2
-# 自定义组件配置:on
+# 自定义组件配置
 ```
 
 #### 3. 创建连接器配置入口类

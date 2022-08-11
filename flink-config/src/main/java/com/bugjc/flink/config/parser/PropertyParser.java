@@ -58,7 +58,7 @@ public class PropertyParser {
                 continue;
             }
 
-            //为当前容器创建一个存储数据的对象并将对象的引用保存到 Hash表 中
+            //为当前容器创建一个存储数据的对象并将对象的引用保存到 Hash表中
             output.putContainer(currentGroupContainer);
 
             //获取当前容器类型的处理器来处理当前字段
