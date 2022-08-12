@@ -7,7 +7,7 @@
     <groupId>com.bugjc.flink</groupId>
     <artifactId>flink-framework</artifactId>
     <packaging>pom</packaging>
-    <version>1.15.1</version>
+    <version>1.15.1-SNAPSHOT</version>
     <modules>
         <module>flink-config</module>
         <module>flink-connector</module>
